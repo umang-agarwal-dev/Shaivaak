@@ -1,0 +1,5 @@
+venv/*
+*.nc
+*.grib
+.env
+*.csv
