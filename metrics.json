@@ -1,0 +1,2022 @@
+{
+  "executive_summary": {
+    "title": "Copernicus CAMS Surface Ozone Machine Learning Enhancement",
+    "description": "High-resolution geospatial post-processing of Copernicus Atmosphere Monitoring Service (CAMS) global atmospheric forecasts using Gradient Boosted Decision Trees and static physiographic terrain covariates.",
+    "period": "June 7, 2026 \u2013 September 6, 2026 (92 Days)",
+    "total_stations": 20,
+    "total_records": 1840,
+    "labeled_records": 1409,
+    "regions": [
+      "Delhi-NCR (North India)",
+      "Peninsular / Coastal (South India)"
+    ],
+    "kpis": {
+      "cv_rmse_reduction_pct": 31.32,
+      "cv_rmse_naive": 19.55,
+      "cv_rmse_xgb": 13.4,
+      "cv_mae_reduction_pct": 35.82,
+      "cv_mae_naive": 15.89,
+      "cv_mae_xgb": 10.13,
+      "cv_r2_improvement_pts": 1.63,
+      "cv_r2_naive": -2.05,
+      "cv_r2_xgb": -0.42,
+      "holdout_rmse_reduction_pct": 42.97,
+      "holdout_rmse_ppb_pct": 7.02
+    }
+  },
+  "benchmark_cv": {
+    "description": "5-Fold Spatial Group Cross-Validation (GroupKFold across 20 stations, 4 full stations held out per fold)",
+    "mean": {
+      "RMSE": {
+        "naive_CAMS": 19.5499,
+        "xgboost": 13.3951,
+        "improvement_pct": 31.32,
+        "std_xgb": 1.017
+      },
+      "MAE": {
+        "naive_CAMS": 15.8937,
+        "xgboost": 10.1306,
+        "improvement_pct": 35.82,
+        "std_xgb": 0.5874
+      },
+      "R2": {
+        "naive_CAMS": -2.0454,
+        "xgboost": -0.4165,
+        "improvement_pct": 1.63,
+        "std_xgb": 0.1636
+      }
+    },
+    "folds": [
+      {
+        "fold": 1,
+        "RMSE": {
+          "naive": 19.1467,
+          "xgb": 14.1468,
+          "improvement_pct": 26.11
+        },
+        "MAE": {
+          "naive": 14.8085,
+          "xgb": 9.9449,
+          "improvement_pct": 32.84
+        },
+        "R2": {
+          "naive": -1.4887,
+          "xgb": -0.3586,
+          "improvement_pct": 1.1301
+        }
+      },
+      {
+        "fold": 2,
+        "RMSE": {
+          "naive": 19.7718,
+          "xgb": 12.2546,
+          "improvement_pct": 38.02
+        },
+        "MAE": {
+          "naive": 17.1791,
+          "xgb": 10.03,
+          "improvement_pct": 41.62
+        },
+        "R2": {
+          "naive": -3.0806,
+          "xgb": -0.5676,
+          "improvement_pct": 2.513
+        }
+      },
+      {
+        "fold": 3,
+        "RMSE": {
+          "naive": 20.1914,
+          "xgb": 13.2204,
+          "improvement_pct": 34.52
+        },
+        "MAE": {
+          "naive": 16.4304,
+          "xgb": 9.2984,
+          "improvement_pct": 43.41
+        },
+        "R2": {
+          "naive": -1.96,
+          "xgb": -0.2689,
+          "improvement_pct": 1.691
+        }
+      },
+      {
+        "fold": 4,
+        "RMSE": {
+          "naive": 21.3725,
+          "xgb": 14.6971,
+          "improvement_pct": 31.23
+        },
+        "MAE": {
+          "naive": 16.9481,
+          "xgb": 10.7832,
+          "improvement_pct": 36.38
+        },
+        "R2": {
+          "naive": -1.6942,
+          "xgb": -0.274,
+          "improvement_pct": 1.4201
+        }
+      },
+      {
+        "fold": 5,
+        "RMSE": {
+          "naive": 17.2672,
+          "xgb": 12.6564,
+          "improvement_pct": 26.7
+        },
+        "MAE": {
+          "naive": 14.1025,
+          "xgb": 10.5967,
+          "improvement_pct": 24.86
+        },
+        "R2": {
+          "naive": -2.0033,
+          "xgb": -0.6136,
+          "improvement_pct": 1.3898
+        }
+      }
+    ]
+  },
+  "benchmark_holdout": {
+    "description": "Spatial Holdout Test Set: Stations 17 (Inland Delhi-NCR) & 5624 (Near-Coast Hyderabad)",
+    "sample_count": 155,
+    "held_out_stations": [
+      17,
+      5624
+    ],
+    "metrics": {
+      "RMSE": {
+        "naive_CAMS_raw": 21.41,
+        "naive_CAMS_ppb": 13.13,
+        "xgboost": 12.21,
+        "improvement_raw_pct": 43.0,
+        "improvement_ppb_pct": 7.0
+      },
+      "MAE": {
+        "naive_CAMS_raw": 18.0,
+        "naive_CAMS_ppb": 9.96,
+        "xgboost": 9.74,
+        "improvement_raw_pct": 45.9,
+        "improvement_ppb_pct": 2.3
+      },
+      "R2": {
+        "naive_CAMS_raw": -2.42,
+        "naive_CAMS_ppb": -0.29,
+        "xgboost": -0.11,
+        "gain_raw_pts": 2.31,
+        "gain_ppb_pts": 0.17
+      }
+    }
+  },
+  "scatter_plot": {
+    "min_val": 0.0,
+    "max_val": 61.0,
+    "points": [
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-07",
+        "actual": 6.3,
+        "predicted": 8.52,
+        "cams_ppb": 3.23,
+        "error": 2.22
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-08",
+        "actual": 5.99,
+        "predicted": 27.44,
+        "cams_ppb": 17.18,
+        "error": 21.45
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-09",
+        "actual": 3.95,
+        "predicted": 17.0,
+        "cams_ppb": 18.17,
+        "error": 13.05
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-10",
+        "actual": 6.52,
+        "predicted": 19.28,
+        "cams_ppb": 27.37,
+        "error": 12.77
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-11",
+        "actual": 15.2,
+        "predicted": 17.49,
+        "cams_ppb": 12.64,
+        "error": 2.29
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-12",
+        "actual": 17.5,
+        "predicted": 28.29,
+        "cams_ppb": 47.22,
+        "error": 10.79
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-13",
+        "actual": 12.49,
+        "predicted": 13.58,
+        "cams_ppb": 29.74,
+        "error": 1.09
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-14",
+        "actual": 4.92,
+        "predicted": 6.4,
+        "cams_ppb": 18.46,
+        "error": 1.48
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-15",
+        "actual": 8.12,
+        "predicted": 12.53,
+        "cams_ppb": 9.39,
+        "error": 4.41
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-16",
+        "actual": 2.94,
+        "predicted": 5.6,
+        "cams_ppb": 15.63,
+        "error": 2.66
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-17",
+        "actual": 3.52,
+        "predicted": 3.36,
+        "cams_ppb": 6.39,
+        "error": -0.15
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-18",
+        "actual": 10.66,
+        "predicted": 3.8,
+        "cams_ppb": 8.34,
+        "error": -6.87
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-19",
+        "actual": 27.15,
+        "predicted": 12.74,
+        "cams_ppb": 9.14,
+        "error": -14.41
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-20",
+        "actual": 6.26,
+        "predicted": 8.24,
+        "cams_ppb": 15.07,
+        "error": 1.98
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-21",
+        "actual": 10.75,
+        "predicted": 25.17,
+        "cams_ppb": 18.02,
+        "error": 14.42
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-22",
+        "actual": 5.08,
+        "predicted": 12.92,
+        "cams_ppb": 14.25,
+        "error": 7.85
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-26",
+        "actual": 9.12,
+        "predicted": 9.52,
+        "cams_ppb": 7.34,
+        "error": 0.4
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-27",
+        "actual": 14.6,
+        "predicted": 12.92,
+        "cams_ppb": 4.27,
+        "error": -1.68
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-28",
+        "actual": 5.93,
+        "predicted": 12.91,
+        "cams_ppb": 6.47,
+        "error": 6.98
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-29",
+        "actual": 15.75,
+        "predicted": 22.37,
+        "cams_ppb": 20.35,
+        "error": 6.62
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-06-30",
+        "actual": 0.7,
+        "predicted": 11.74,
+        "cams_ppb": 8.62,
+        "error": 11.04
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-01",
+        "actual": 5.71,
+        "predicted": 19.35,
+        "cams_ppb": 30.76,
+        "error": 13.64
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-02",
+        "actual": 2.8,
+        "predicted": 15.26,
+        "cams_ppb": 33.81,
+        "error": 12.46
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-03",
+        "actual": 4.1,
+        "predicted": 17.76,
+        "cams_ppb": 34.02,
+        "error": 13.66
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-04",
+        "actual": 6.65,
+        "predicted": 11.79,
+        "cams_ppb": 22.34,
+        "error": 5.14
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-05",
+        "actual": 5.2,
+        "predicted": 17.13,
+        "cams_ppb": 26.01,
+        "error": 11.93
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-06",
+        "actual": 4.75,
+        "predicted": 15.81,
+        "cams_ppb": 47.41,
+        "error": 11.06
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-07",
+        "actual": 1.95,
+        "predicted": 5.18,
+        "cams_ppb": 12.07,
+        "error": 3.23
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-08",
+        "actual": 5.43,
+        "predicted": 10.56,
+        "cams_ppb": 34.03,
+        "error": 5.13
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-09",
+        "actual": 14.75,
+        "predicted": 12.59,
+        "cams_ppb": 31.77,
+        "error": -2.16
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-10",
+        "actual": 5.18,
+        "predicted": 4.88,
+        "cams_ppb": 10.42,
+        "error": -0.3
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-11",
+        "actual": 9.15,
+        "predicted": 5.9,
+        "cams_ppb": 13.26,
+        "error": -3.25
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-12",
+        "actual": 4.08,
+        "predicted": 8.67,
+        "cams_ppb": 16.41,
+        "error": 4.59
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-13",
+        "actual": 8.71,
+        "predicted": 11.57,
+        "cams_ppb": 19.02,
+        "error": 2.87
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-14",
+        "actual": 15.95,
+        "predicted": 13.67,
+        "cams_ppb": 4.92,
+        "error": -2.28
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-15",
+        "actual": 7.55,
+        "predicted": 15.71,
+        "cams_ppb": 17.2,
+        "error": 8.16
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-16",
+        "actual": 6.94,
+        "predicted": 11.65,
+        "cams_ppb": 11.33,
+        "error": 4.71
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-17",
+        "actual": 7.15,
+        "predicted": 10.36,
+        "cams_ppb": 11.49,
+        "error": 3.21
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-18",
+        "actual": 1.84,
+        "predicted": 12.73,
+        "cams_ppb": 18.45,
+        "error": 10.89
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-19",
+        "actual": 2.27,
+        "predicted": 7.33,
+        "cams_ppb": 18.41,
+        "error": 5.05
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-20",
+        "actual": 7.76,
+        "predicted": 10.53,
+        "cams_ppb": 8.91,
+        "error": 2.77
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-21",
+        "actual": 7.3,
+        "predicted": 15.27,
+        "cams_ppb": 22.26,
+        "error": 7.97
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-22",
+        "actual": 9.25,
+        "predicted": 21.56,
+        "cams_ppb": 36.71,
+        "error": 12.31
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-23",
+        "actual": 2.05,
+        "predicted": 22.14,
+        "cams_ppb": 28.69,
+        "error": 20.09
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-24",
+        "actual": 12.3,
+        "predicted": 27.91,
+        "cams_ppb": 35.86,
+        "error": 15.61
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-25",
+        "actual": 3.67,
+        "predicted": 16.59,
+        "cams_ppb": 23.14,
+        "error": 12.91
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-26",
+        "actual": 11.9,
+        "predicted": 19.31,
+        "cams_ppb": 21.97,
+        "error": 7.41
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-28",
+        "actual": 8.12,
+        "predicted": 16.78,
+        "cams_ppb": 29.4,
+        "error": 8.65
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-29",
+        "actual": 17.25,
+        "predicted": 14.67,
+        "cams_ppb": 20.5,
+        "error": -2.58
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-30",
+        "actual": 13.0,
+        "predicted": 15.32,
+        "cams_ppb": 16.95,
+        "error": 2.32
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-07-31",
+        "actual": 21.2,
+        "predicted": 16.88,
+        "cams_ppb": 27.86,
+        "error": -4.32
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-01",
+        "actual": 24.35,
+        "predicted": 17.29,
+        "cams_ppb": 28.44,
+        "error": -7.06
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-02",
+        "actual": 0.4,
+        "predicted": 14.89,
+        "cams_ppb": 32.45,
+        "error": 14.49
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-04",
+        "actual": 24.4,
+        "predicted": 34.31,
+        "cams_ppb": 21.65,
+        "error": 9.91
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-05",
+        "actual": 14.9,
+        "predicted": 3.59,
+        "cams_ppb": 17.95,
+        "error": -11.31
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-06",
+        "actual": 29.95,
+        "predicted": 7.57,
+        "cams_ppb": 32.33,
+        "error": -22.38
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-07",
+        "actual": 10.9,
+        "predicted": 7.1,
+        "cams_ppb": 21.55,
+        "error": -3.8
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-10",
+        "actual": 3.67,
+        "predicted": 15.03,
+        "cams_ppb": 21.78,
+        "error": 11.35
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-11",
+        "actual": 16.85,
+        "predicted": 4.93,
+        "cams_ppb": 25.77,
+        "error": -11.92
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-12",
+        "actual": 18.1,
+        "predicted": 3.25,
+        "cams_ppb": 1.72,
+        "error": -14.85
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-13",
+        "actual": 2.55,
+        "predicted": 9.09,
+        "cams_ppb": 9.84,
+        "error": 6.54
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-14",
+        "actual": 4.5,
+        "predicted": 10.01,
+        "cams_ppb": 13.9,
+        "error": 5.51
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-15",
+        "actual": 3.66,
+        "predicted": 5.55,
+        "cams_ppb": 4.4,
+        "error": 1.89
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-16",
+        "actual": 12.15,
+        "predicted": 13.65,
+        "cams_ppb": 14.93,
+        "error": 1.5
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-18",
+        "actual": 16.2,
+        "predicted": 11.66,
+        "cams_ppb": 17.23,
+        "error": -4.54
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-19",
+        "actual": 4.07,
+        "predicted": 8.11,
+        "cams_ppb": 14.96,
+        "error": 4.05
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-21",
+        "actual": 5.67,
+        "predicted": 7.26,
+        "cams_ppb": 5.21,
+        "error": 1.6
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-22",
+        "actual": 16.3,
+        "predicted": 14.71,
+        "cams_ppb": 20.05,
+        "error": -1.59
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-23",
+        "actual": 21.6,
+        "predicted": 13.15,
+        "cams_ppb": 16.64,
+        "error": -8.45
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-25",
+        "actual": 23.15,
+        "predicted": 4.12,
+        "cams_ppb": 19.94,
+        "error": -19.03
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-26",
+        "actual": 9.3,
+        "predicted": 4.62,
+        "cams_ppb": 14.1,
+        "error": -4.68
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-27",
+        "actual": 7.21,
+        "predicted": 10.38,
+        "cams_ppb": 8.66,
+        "error": 3.17
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-29",
+        "actual": 7.51,
+        "predicted": 13.12,
+        "cams_ppb": 19.68,
+        "error": 5.61
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-08-31",
+        "actual": 12.35,
+        "predicted": 14.72,
+        "cams_ppb": 20.84,
+        "error": 2.37
+      },
+      {
+        "station_id": 17,
+        "station_name": "R K Puram, Delhi - DPCC",
+        "region": "north",
+        "set": "Holdout Test",
+        "date": "2026-09-01",
+        "actual": 8.86,
+        "predicted": 9.5,
+        "cams_ppb": 12.86,
+        "error": 0.64
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-07",
+        "actual": 49.6,
+        "predicted": 25.39,
+        "cams_ppb": 31.06,
+        "error": -24.21
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-08",
+        "actual": 50.5,
+        "predicted": 28.74,
+        "cams_ppb": 28.22,
+        "error": -21.76
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-09",
+        "actual": 58.1,
+        "predicted": 20.71,
+        "cams_ppb": 22.34,
+        "error": -37.39
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-10",
+        "actual": 44.8,
+        "predicted": 13.49,
+        "cams_ppb": 20.29,
+        "error": -31.31
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-11",
+        "actual": 29.9,
+        "predicted": 15.49,
+        "cams_ppb": 19.44,
+        "error": -14.41
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-12",
+        "actual": 29.6,
+        "predicted": 15.62,
+        "cams_ppb": 20.53,
+        "error": -13.98
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-13",
+        "actual": 0.0,
+        "predicted": 15.3,
+        "cams_ppb": 19.93,
+        "error": 15.3
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-14",
+        "actual": 0.0,
+        "predicted": 36.32,
+        "cams_ppb": 30.19,
+        "error": 36.32
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-15",
+        "actual": 31.05,
+        "predicted": 28.29,
+        "cams_ppb": 25.26,
+        "error": -2.76
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-16",
+        "actual": 29.9,
+        "predicted": 18.17,
+        "cams_ppb": 21.71,
+        "error": -11.73
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-17",
+        "actual": 29.95,
+        "predicted": 21.33,
+        "cams_ppb": 10.48,
+        "error": -8.62
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-18",
+        "actual": 30.3,
+        "predicted": 30.37,
+        "cams_ppb": 28.44,
+        "error": 0.07
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-19",
+        "actual": 30.3,
+        "predicted": 20.33,
+        "cams_ppb": 33.86,
+        "error": -9.97
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-20",
+        "actual": 30.5,
+        "predicted": 17.98,
+        "cams_ppb": 26.52,
+        "error": -12.52
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-21",
+        "actual": 34.9,
+        "predicted": 27.57,
+        "cams_ppb": 30.09,
+        "error": -7.33
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-22",
+        "actual": 36.45,
+        "predicted": 20.57,
+        "cams_ppb": 24.0,
+        "error": -15.88
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-23",
+        "actual": 34.6,
+        "predicted": 11.21,
+        "cams_ppb": 21.8,
+        "error": -23.39
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-26",
+        "actual": 36.05,
+        "predicted": 10.41,
+        "cams_ppb": 26.43,
+        "error": -25.64
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-27",
+        "actual": 31.45,
+        "predicted": 18.2,
+        "cams_ppb": 29.44,
+        "error": -13.25
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-28",
+        "actual": 31.5,
+        "predicted": 13.96,
+        "cams_ppb": 24.06,
+        "error": -17.54
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-29",
+        "actual": 30.8,
+        "predicted": 15.03,
+        "cams_ppb": 19.56,
+        "error": -15.77
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-06-30",
+        "actual": 30.95,
+        "predicted": 13.17,
+        "cams_ppb": 17.57,
+        "error": -17.78
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-01",
+        "actual": 31.0,
+        "predicted": 13.81,
+        "cams_ppb": 17.26,
+        "error": -17.19
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-03",
+        "actual": 21.15,
+        "predicted": 11.9,
+        "cams_ppb": 18.88,
+        "error": -9.25
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-04",
+        "actual": 21.45,
+        "predicted": 12.02,
+        "cams_ppb": 19.45,
+        "error": -9.43
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-05",
+        "actual": 21.55,
+        "predicted": 12.05,
+        "cams_ppb": 21.29,
+        "error": -9.5
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-06",
+        "actual": 21.2,
+        "predicted": 11.28,
+        "cams_ppb": 21.75,
+        "error": -9.92
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-07",
+        "actual": 19.75,
+        "predicted": 16.64,
+        "cams_ppb": 22.0,
+        "error": -3.11
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-08",
+        "actual": 21.8,
+        "predicted": 11.68,
+        "cams_ppb": 18.68,
+        "error": -10.12
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-09",
+        "actual": 21.15,
+        "predicted": 19.74,
+        "cams_ppb": 14.74,
+        "error": -1.41
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-10",
+        "actual": 21.9,
+        "predicted": 12.08,
+        "cams_ppb": 15.39,
+        "error": -9.82
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-11",
+        "actual": 19.5,
+        "predicted": 15.44,
+        "cams_ppb": 16.04,
+        "error": -4.06
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-12",
+        "actual": 19.7,
+        "predicted": 14.42,
+        "cams_ppb": 17.02,
+        "error": -5.28
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-13",
+        "actual": 19.1,
+        "predicted": 15.21,
+        "cams_ppb": 16.25,
+        "error": -3.89
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-14",
+        "actual": 19.2,
+        "predicted": 14.64,
+        "cams_ppb": 20.64,
+        "error": -4.56
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-15",
+        "actual": 19.2,
+        "predicted": 19.52,
+        "cams_ppb": 22.32,
+        "error": 0.32
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-16",
+        "actual": 19.4,
+        "predicted": 23.49,
+        "cams_ppb": 22.1,
+        "error": 4.09
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-17",
+        "actual": 21.05,
+        "predicted": 18.33,
+        "cams_ppb": 19.54,
+        "error": -2.72
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-18",
+        "actual": 21.35,
+        "predicted": 13.95,
+        "cams_ppb": 16.32,
+        "error": -7.4
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-19",
+        "actual": 21.9,
+        "predicted": 12.09,
+        "cams_ppb": 13.51,
+        "error": -9.81
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-20",
+        "actual": 21.75,
+        "predicted": 10.32,
+        "cams_ppb": 15.04,
+        "error": -11.43
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-21",
+        "actual": 21.6,
+        "predicted": 9.45,
+        "cams_ppb": 16.32,
+        "error": -12.15
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-22",
+        "actual": 21.85,
+        "predicted": 9.51,
+        "cams_ppb": 15.71,
+        "error": -12.34
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-23",
+        "actual": 22.2,
+        "predicted": 13.76,
+        "cams_ppb": 17.75,
+        "error": -8.44
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-24",
+        "actual": 20.4,
+        "predicted": 14.03,
+        "cams_ppb": 22.78,
+        "error": -6.37
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-25",
+        "actual": 20.35,
+        "predicted": 10.81,
+        "cams_ppb": 14.44,
+        "error": -9.54
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-26",
+        "actual": 19.0,
+        "predicted": 10.57,
+        "cams_ppb": 15.0,
+        "error": -8.43
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-27",
+        "actual": 23.35,
+        "predicted": 9.68,
+        "cams_ppb": 16.19,
+        "error": -13.67
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-28",
+        "actual": 22.7,
+        "predicted": 11.65,
+        "cams_ppb": 16.82,
+        "error": -11.05
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-29",
+        "actual": 28.4,
+        "predicted": 8.99,
+        "cams_ppb": 15.59,
+        "error": -19.41
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-30",
+        "actual": 27.0,
+        "predicted": 13.23,
+        "cams_ppb": 18.43,
+        "error": -13.77
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-07-31",
+        "actual": 27.4,
+        "predicted": 8.65,
+        "cams_ppb": 18.23,
+        "error": -18.75
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-01",
+        "actual": 22.35,
+        "predicted": 8.3,
+        "cams_ppb": 14.8,
+        "error": -14.05
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-02",
+        "actual": 22.25,
+        "predicted": 12.39,
+        "cams_ppb": 15.85,
+        "error": -9.86
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-03",
+        "actual": 20.25,
+        "predicted": 8.91,
+        "cams_ppb": 15.53,
+        "error": -11.34
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-04",
+        "actual": 22.4,
+        "predicted": 9.98,
+        "cams_ppb": 16.85,
+        "error": -12.42
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-05",
+        "actual": 22.6,
+        "predicted": 12.69,
+        "cams_ppb": 17.86,
+        "error": -9.91
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-06",
+        "actual": 22.4,
+        "predicted": 11.15,
+        "cams_ppb": 13.98,
+        "error": -11.25
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-07",
+        "actual": 20.2,
+        "predicted": 16.2,
+        "cams_ppb": 16.63,
+        "error": -4.0
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-08",
+        "actual": 20.2,
+        "predicted": 14.82,
+        "cams_ppb": 15.56,
+        "error": -5.38
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-09",
+        "actual": 20.35,
+        "predicted": 14.64,
+        "cams_ppb": 16.63,
+        "error": -5.71
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-10",
+        "actual": 20.35,
+        "predicted": 9.95,
+        "cams_ppb": 17.71,
+        "error": -10.4
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-11",
+        "actual": 20.35,
+        "predicted": 13.08,
+        "cams_ppb": 13.93,
+        "error": -7.27
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-12",
+        "actual": 20.4,
+        "predicted": 11.91,
+        "cams_ppb": 15.93,
+        "error": -8.49
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-13",
+        "actual": 20.4,
+        "predicted": 14.41,
+        "cams_ppb": 13.89,
+        "error": -5.99
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-14",
+        "actual": 20.25,
+        "predicted": 15.73,
+        "cams_ppb": 15.08,
+        "error": -4.52
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-18",
+        "actual": 20.1,
+        "predicted": 14.24,
+        "cams_ppb": 13.25,
+        "error": -5.86
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-19",
+        "actual": 20.1,
+        "predicted": 14.24,
+        "cams_ppb": 13.66,
+        "error": -5.86
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-20",
+        "actual": 21.4,
+        "predicted": 18.31,
+        "cams_ppb": 17.98,
+        "error": -3.09
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-21",
+        "actual": 20.0,
+        "predicted": 20.97,
+        "cams_ppb": 20.44,
+        "error": 0.97
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-22",
+        "actual": 19.95,
+        "predicted": 15.89,
+        "cams_ppb": 16.1,
+        "error": -4.06
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-23",
+        "actual": 39.6,
+        "predicted": 12.29,
+        "cams_ppb": 16.2,
+        "error": -27.31
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-24",
+        "actual": 35.8,
+        "predicted": 12.79,
+        "cams_ppb": 18.5,
+        "error": -23.01
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-25",
+        "actual": 40.6,
+        "predicted": 13.87,
+        "cams_ppb": 17.78,
+        "error": -26.73
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-26",
+        "actual": 40.5,
+        "predicted": 14.53,
+        "cams_ppb": 15.69,
+        "error": -25.97
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-29",
+        "actual": 39.35,
+        "predicted": 16.16,
+        "cams_ppb": 15.19,
+        "error": -23.19
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-08-31",
+        "actual": 39.65,
+        "predicted": 19.92,
+        "cams_ppb": 18.36,
+        "error": -19.73
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-09-01",
+        "actual": 39.85,
+        "predicted": 19.24,
+        "cams_ppb": 17.88,
+        "error": -20.61
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-09-02",
+        "actual": 9.8,
+        "predicted": 22.89,
+        "cams_ppb": 18.74,
+        "error": 13.09
+      },
+      {
+        "station_id": 5624,
+        "station_name": "IDA Pashamylaram, Hyderabad - TSPCB",
+        "region": "south",
+        "set": "Holdout Test",
+        "date": "2026-09-03",
+        "actual": 14.75,
+        "predicted": 13.3,
+        "cams_ppb": 16.73,
+        "error": -1.45
+      }
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "elevation_mean_20km",
+      "importance": 0.17,
+      "percentage": 17.0,
+      "title": "Mean Elevation (20km radius)",
+      "unit": "meters a.s.l.",
+      "description": "Governs regional planetary boundary layer height and baseline free-tropospheric ozone intrusion."
+    },
+    {
+      "feature": "day_of_year_sin",
+      "importance": 0.1281,
+      "percentage": 12.81,
+      "title": "Day of Year (Sinusoidal)",
+      "unit": "cyclical [0, 1]",
+      "description": "Captures the broad 3-month seasonal solar radiation and monsoon shift governing photochemical ozone synthesis."
+    },
+    {
+      "feature": "elevation_std_20km",
+      "importance": 0.1128,
+      "percentage": 11.28,
+      "title": "Topographic Roughness (Std Dev)",
+      "unit": "meters",
+      "description": "Represents local topographic slope gradients that steer valley drainage, surface ventilation, and stagnant pollutant pooling."
+    },
+    {
+      "feature": "dist_to_coast_km",
+      "importance": 0.0929,
+      "percentage": 9.29,
+      "title": "Distance to Coastline",
+      "unit": "kilometers",
+      "description": "Delineates marine boundary layer conditions (elevated moisture, sea breeze) from dry continental inland air masses."
+    },
+    {
+      "feature": "day_of_year_cos",
+      "importance": 0.0866,
+      "percentage": 8.66,
+      "title": "Day of Year (Cosine)",
+      "unit": "cyclical [0, 1]",
+      "description": "Complements annual progression to track post-monsoon photochemical transition phases and cloud wash-out dynamics."
+    },
+    {
+      "feature": "sp",
+      "importance": 0.0667,
+      "percentage": 6.67,
+      "title": "Surface Air Pressure",
+      "unit": "Pascals (Pa)",
+      "description": "Reflects synoptic anti-cyclonic subsidence and boundary layer compression favoring smog accumulation."
+    },
+    {
+      "feature": "day_length_hours",
+      "importance": 0.0593,
+      "percentage": 5.93,
+      "title": "Astronomical Day Length",
+      "unit": "hours",
+      "description": "Total daily solar insolation window available for photochemical formation."
+    },
+    {
+      "feature": "wind_direction_deg",
+      "importance": 0.0576,
+      "percentage": 5.76,
+      "title": "10m Wind Direction",
+      "unit": "degrees",
+      "description": "Identifies synoptic and meso-scale upwind transport corridors carrying precursor NOx and VOCs."
+    },
+    {
+      "feature": "wind_speed",
+      "importance": 0.0413,
+      "percentage": 4.13,
+      "title": "10m Wind Speed",
+      "unit": "m/s",
+      "description": "Controls horizontal mechanical dispersion and ventilation of boundary-layer precursors."
+    },
+    {
+      "feature": "d2m",
+      "importance": 0.0395,
+      "percentage": 3.95,
+      "title": "2m Dewpoint Temperature",
+      "unit": "Kelvin (K)",
+      "description": "Atmospheric moisture proxy; modulates radical chemical termination and localized cloud attenuation."
+    },
+    {
+      "feature": "neighbor_o3_lagged",
+      "importance": 0.0336,
+      "percentage": 3.36,
+      "title": "Upwind Station Lagged Ozone",
+      "unit": "ppb",
+      "description": "Transports empirical upstream ozone observations downwind with physical travel delays, providing advective memory."
+    },
+    {
+      "feature": "t2m",
+      "importance": 0.0327,
+      "percentage": 3.27,
+      "title": "2m Air Temperature",
+      "unit": "Kelvin (K)",
+      "description": "Direct kinetic driver of hydrocarbon oxidation and photochemical ozone generation."
+    },
+    {
+      "feature": "no2",
+      "importance": 0.0316,
+      "percentage": 3.16,
+      "title": "CAMS NO\u2082 Mixing Ratio",
+      "unit": "kg/kg",
+      "description": "Key combustion precursor governing ozone photostationary state and titration."
+    },
+    {
+      "feature": "c5h8",
+      "importance": 0.027,
+      "percentage": 2.7,
+      "title": "CAMS Isoprene Mixing Ratio",
+      "unit": "kg/kg",
+      "description": "Biogenic precursor VOC driving photochemical ozone generation in vegetated regions."
+    },
+    {
+      "feature": "go3",
+      "importance": 0.0204,
+      "percentage": 2.04,
+      "title": "CAMS Raw Ozone Forecast",
+      "unit": "kg/kg",
+      "description": "Global deterministic CAMS chemical transport model baseline prior to ML correction."
+    },
+    {
+      "feature": "hour_cos",
+      "importance": 0.0,
+      "percentage": 0.0,
+      "title": "Hour of Day (Cosine)",
+      "unit": "cyclical 24h",
+      "description": "Tracks nocturnal boundary layer collapse and nocturnal titration by NO."
+    },
+    {
+      "feature": "hour_sin",
+      "importance": 0.0,
+      "percentage": 0.0,
+      "title": "Hour of Day (Sinusoidal)",
+      "unit": "cyclical 24h",
+      "description": "Diurnal solar elevation tracking peak afternoon photochemical ozone synthesis."
+    }
+  ]
+}

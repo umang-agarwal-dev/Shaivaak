@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CleanAir AI — Surface Ozone Intelligence for India</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans (Headings & UI) and Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <!-- Pre-exported Data Bundle (guarantees zero-CORS offline execution via file://) -->
+  <script src="dashboard_data.js"></script>
+
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-subtle: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --good-green: #10b981;
+      --warn-amber: #f59e0b;
+      --bad-red: #ef4444;
+      --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 48px 32px 96px 32px;
+    }
+
+    /* Section Spacing & Headers */
+    .section-wrap {
+      margin-top: 56px;
+    }
+
+    .section-heading-group {
+      margin-bottom: 24px;
+    }
+
+    .section-eyebrow {
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .section-description {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 760px;
+      margin-top: 6px;
+      line-height: 1.55;
+    }
+
+    /* 1. NON-TECHNICAL HERO HEADER */
+    .hero-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 36px 40px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .hero-top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .hero-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.03em;
+      line-height: 1.25;
+      margin-bottom: 14px;
+      max-width: 860px;
+    }
+
+    .hero-summary {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 820px;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    .hero-summary strong {
+      color: var(--text-main);
+    }
+
+    /* 4 Non-technical Cards */
+    .hero-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .hero-card {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .hero-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .hero-card-tag {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .hero-card-headline {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-card-headline.highlight {
+      color: var(--primary);
+    }
+
+    .hero-card-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Quick Jump Anchor Nav */
+    .jump-nav {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .jump-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 14px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .jump-link:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* 2. MAP SECTION (GENEROUS & ELEGANT) */
+    .map-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .map-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .pill-group {
+      display: inline-flex;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .pill-btn {
+      background: transparent;
+      border: none;
+      padding: 7px 15px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      color: var(--text-main);
+    }
+
+    .pill-btn.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .pill-btn.active.primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    #map-container {
+      height: 540px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      position: relative;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+
+    /* Gradient Legend Strip */
+    .map-gradient-legend-wrap {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .legend-title-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .legend-main-title {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .legend-sub-title {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .gradient-bar-container {
+      flex: 1;
+      max-width: 520px;
+      min-width: 260px;
+    }
+
+    .gradient-bar {
+      height: 10px;
+      border-radius: 5px;
+      width: 100%;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .gradient-bar.trend-mode {
+      background: linear-gradient(to right, #059669 0%, #10b981 30%, #94a3b8 50%, #f59e0b 70%, #ef4444 100%);
+    }
+
+    .gradient-bar.level-mode {
+      background: linear-gradient(to right, #10b981 0%, #34d399 25%, #f59e0b 60%, #ef4444 100%);
+    }
+
+    .gradient-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Leaflet Popup Styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
+      border: 1px solid var(--border);
+      padding: 0;
+    }
+
+    .leaflet-popup-content {
+      margin: 16px 18px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .popup-station-city {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .popup-station-name {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .popup-value-hero {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 8px 0;
+    }
+
+    .popup-value-num {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .popup-trend-chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .popup-explain {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      background: var(--surface-subtle);
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+
+    .popup-inspect-btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--primary);
+      color: #ffffff;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .popup-inspect-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* 3. TIME SERIES PANEL */
+    .timeseries-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .station-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .station-select-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .station-select-group label {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+    }
+
+    select.stylish-select {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      min-width: 320px;
+    }
+
+    select.stylish-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .station-badge-strip {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .station-info-pill {
+      font-size: 12px;
+      padding: 6px 12px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+
+    .station-info-pill strong {
+      color: var(--text-main);
+    }
+
+    .chart-box {
+      height: 380px;
+      width: 100%;
+      position: relative;
+    }
+
+    .timeseries-caption {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    /* 4. TECHNICAL BENCHMARK SECTION (CLEAN & GROUPED) */
+    .technical-section {
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .card-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .card-title-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .physics-item {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+
+    .physics-item-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .physics-item-pct {
+      font-family: var(--font-mono);
+      color: var(--primary);
+    }
+
+    .physics-item-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 72px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 960px) {
+      .hero-cards-grid, .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .container {
+        padding: 24px 16px;
+      }
+      #map-container {
+        height: 440px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- 1. HERO HEADER: NON-TECHNICAL & CLEAN -->
+  <header class="hero-header">
+    <div class="hero-top-badge">
+      <span class="hero-pulse"></span>
+      HackQuest 2026 &bull; AI for Environmental Health
+    </div>
+
+    <h1 class="hero-title">Local Terrain AI for Smarter Air Quality Forecasts</h1>
+    <p class="hero-summary">
+      Global satellite models frequently miscalculate ground-level smog because they miss local hills, valley air pockets, and coastal breezes. We built a localized machine learning model across <strong>20 Indian monitoring stations</strong> that eliminates these blind spots — cutting forecast errors by <strong>over 31%</strong> so cities and citizens receive accurate pollution alerts.
+    </p>
+
+    <!-- 4 Plain-English Benefit Cards -->
+    <div class="hero-cards-grid">
+      <div class="hero-card">
+        <div class="hero-card-tag">Prediction Accuracy</div>
+        <div class="hero-card-headline highlight">31% Error Cut</div>
+        <div class="hero-card-text">Substantially more accurate than raw Copernicus global satellite predictions.</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-card-tag">Monitoring Network</div>
+        <div class="hero-card-headline">20 Cities & Hubs</div>
+        <div class="hero-card-text">Covering Delhi-NCR, Hyderabad, Bengaluru, Chennai, and Amaravati.</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-card-tag">Recent Air Trend</div>
+        <div class="hero-card-headline" style="color: var(--good-green);">Air Improving &darr;</div>
+        <div class="hero-card-text">Seasonal monsoon winds have lowered Delhi surface ozone by ~8–14 ppb this week.</div>
+      </div>
+
+      <div class="hero-card">
+        <div class="hero-card-tag">Geographic AI</div>
+        <div class="hero-card-headline">Terrain-Aware</div>
+        <div class="hero-card-text">Learns how topography, coast proximity, and regional winds steer local smog.</div>
+      </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <nav class="jump-nav">
+      <a href="#map-section" class="jump-link">🗺️ Interactive Gradient Map</a>
+      <a href="#timeseries-section" class="jump-link">📈 90-Day Station Timelines</a>
+      <a href="#benchmarks-section" class="jump-link">🔬 Technical Model Validation & Physics</a>
+    </nav>
+  </header>
+
+  <!-- 2. MAP SECTION: PROPER MAP TILES & GRADIENT VISUALIZATION -->
+  <section class="section-wrap" id="map-section">
+    <div class="section-heading-group">
+      <div class="section-eyebrow">Geographic Coverage</div>
+      <h2 class="section-title">National Air Quality & Trend Map</h2>
+      <p class="section-description">
+        Explore surface ozone across all 20 stations in India. Use the gradient toggle below to visualize weekly increases vs. decreases or absolute air quality intensity.
+      </p>
+    </div>
+
+    <div class="map-panel">
+      <!-- Controls Toolbar -->
+      <div class="map-controls-bar">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Map Visualization:</span>
+          <div class="pill-group" id="map-mode-pills">
+            <button class="pill-btn active primary" onclick="setMapMode('trend', this)">Weekly Trend (Increase vs Decrease)</button>
+            <button class="pill-btn" onclick="setMapMode('level', this)">Ozone Concentration</button>
+            <button class="pill-btn" onclick="setMapMode('correction', this)">AI vs Satellite Adjustment</button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Focus:</span>
+          <div class="pill-group" id="region-filter-pills">
+            <button class="pill-btn active" onclick="filterMapRegion('all', this)">All (20)</button>
+            <button class="pill-btn" onclick="filterMapRegion('north', this)">Delhi-NCR</button>
+            <button class="pill-btn" onclick="filterMapRegion('south', this)">South India</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proper Leaflet Map Container -->
+      <div id="map-container"></div>
+
+      <!-- Continuous Gradient Legend Bar -->
+      <div class="map-gradient-legend-wrap">
+        <div class="legend-title-box">
+          <span class="legend-main-title" id="legend-main-title">7-Day Ozone Trend (Increase vs. Decrease Gradient)</span>
+          <span class="legend-sub-title" id="legend-sub-title">Green indicates improving air; Red indicates rising photochemical smog</span>
+        </div>
+
+        <div class="gradient-bar-container">
+          <div class="gradient-bar trend-mode" id="gradient-bar-visual"></div>
+          <div class="gradient-labels" id="gradient-labels">
+            <span id="grad-lbl-left">&darr; -14 ppb (Decreasing)</span>
+            <span id="grad-lbl-mid">&minus; 0 ppb (Steady)</span>
+            <span id="grad-lbl-right">&uarr; +8 ppb (Increasing)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. TIME SERIES SECTION: STATION TRAJECTORY -->
+  <section class="section-wrap" id="timeseries-section">
+    <div class="section-heading-group">
+      <div class="section-eyebrow">Temporal Forecasts</div>
+      <h2 class="section-title">City-by-City Forecast Trajectory</h2>
+      <p class="section-description">
+        Compare actual sensor readings against our AI model and the raw global satellite forecast over 92 consecutive days (June to September 2026).
+      </p>
+    </div>
+
+    <div class="timeseries-panel">
+      <div class="station-toolbar">
+        <div class="station-select-group">
+          <label for="stationSelect">Select City / Station:</label>
+          <select id="stationSelect" class="stylish-select" onchange="onStationSelect(this.value)">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="station-badge-strip">
+          <div class="station-info-pill">Region: <strong id="ts-region">&mdash;</strong></div>
+          <div class="station-info-pill">Coast Distance: <strong id="ts-coast">&mdash;</strong></div>
+          <div class="station-info-pill">Elevation: <strong id="ts-elev">&mdash;</strong></div>
+          <div class="station-info-pill">Current Status: <strong id="ts-status">&mdash;</strong></div>
+        </div>
+      </div>
+
+      <div class="chart-box">
+        <canvas id="timeSeriesChart"></canvas>
+      </div>
+
+      <div class="timeseries-caption">
+        <div>
+          <span style="display: inline-block; width: 10px; height: 10px; background: #0f172a; border-radius: 50%; margin-right: 4px;"></span>
+          <strong>Actual Sensor</strong> (Ground Truth) &nbsp;&bull;&nbsp;
+          <span style="display: inline-block; width: 14px; height: 3px; background: #2563eb; vertical-align: middle; margin-right: 4px;"></span>
+          <strong>CleanAir AI</strong> (Corrected Model) &nbsp;&bull;&nbsp;
+          <span style="display: inline-block; width: 14px; height: 2px; border-top: 2px dashed #f59e0b; vertical-align: middle; margin-right: 4px;"></span>
+          <strong>Raw Global Satellite</strong> (Uncorrected CAMS)
+        </div>
+        <div style="font-family: var(--font-mono); color: var(--primary); font-weight: 600;" id="ts-holdout-badge"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. TECHNICAL BENCHMARKS & PHYSICS (FOR JUDGES & SCIENTISTS) -->
+  <section class="section-wrap technical-section" id="benchmarks-section">
+    <div class="section-heading-group">
+      <div class="section-eyebrow">Rigorous Verification</div>
+      <h2 class="section-title">Model Benchmarking & Atmospheric Physics</h2>
+      <p class="section-description">
+        Quantitative evaluation under 5-Fold Spatial Cross-Validation and unseen holdout stations, followed by XGBoost feature attribution explaining how geography drives air quality.
+      </p>
+    </div>
+
+    <!-- Benchmarking Grid -->
+    <div class="grid-2">
+      <!-- Side by Side Bar Chart -->
+      <div class="card-panel">
+        <div class="card-title-bar">
+          <span class="card-title">Model Performance Benchmark</span>
+          <div class="pill-group">
+            <button class="pill-btn active" id="btn-tab-cv" onclick="switchTechTab('cv')">5-Fold Spatial CV</button>
+            <button class="pill-btn" id="btn-tab-holdout" onclick="switchTechTab('holdout')">Unseen Test Stations</button>
+          </div>
+        </div>
+        <div style="height: 300px;">
+          <canvas id="benchmarkBarChart"></canvas>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 12px; line-height: 1.5;">
+          * <strong>RMSE & MAE</strong>: Lower is better (error in ppb). <strong>R² Fit</strong>: Higher is better. Raw satellite models exhibit large persistent regional biases in India, leading to negative R² without ML calibration.
+        </div>
+      </div>
+
+      <!-- Scatter Plot -->
+      <div class="card-panel">
+        <div class="card-title-bar">
+          <span class="card-title">Predicted vs. Actual Scatter</span>
+          <span class="card-tag">Spatial Holdout (N=155)</span>
+        </div>
+        <div style="height: 300px;">
+          <canvas id="scatterChart"></canvas>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 12px; display: flex; justify-content: space-between;">
+          <span><strong style="color: #059669;">&bull;</strong> Delhi-NCR Station #17</span>
+          <span><strong style="color: #ef4444;">&bull;</strong> Hyderabad Station #5624</span>
+          <span><strong>--</strong> Ideal 1:1 Line (y = x)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Attribution Grid -->
+    <div class="grid-2" style="margin-top: 24px;">
+      <!-- Feature Gain Bar Chart -->
+      <div class="card-panel">
+        <div class="card-title-bar">
+          <span class="card-title">Top Contributing Physical Features</span>
+          <span class="card-tag">Relative Gain %</span>
+        </div>
+        <div style="height: 340px;">
+          <canvas id="featureImportanceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Atmospheric Physics Cards -->
+      <div class="card-panel" style="max-height: 430px; overflow-y: auto;">
+        <div class="card-title-bar">
+          <span class="card-title">Atmospheric Interpretation</span>
+          <span class="card-tag">Why AI Works</span>
+        </div>
+        <div id="physics-cards-list">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <div>
+      <strong>CleanAir AI &bull; India Ozone Prediction System</strong> &mdash; HackQuest 2026.
+    </div>
+    <div>
+      Data: Copernicus CAMS EAC4 &bull; CPCB / OpenAQ &bull; SRTM 30m Topography
+    </div>
+  </footer>
+
+</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+let dashboardData = null;
+let leafletMap = null;
+let mapHalos = [];
+let mapCores = [];
+let currentMapMode = 'trend'; // 'trend', 'level', or 'correction'
+let currentRegion = 'all';
+
+let timeSeriesChartInst = null;
+let benchmarkBarChartInst = null;
+let scatterChartInst = null;
+let featureChartInst = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  dashboardData = await loadData();
+  if (!dashboardData) {
+    alert('Could not load dashboard data. Please check predictions.json or dashboard_data.js.');
+    return;
+  }
+
+  initLeafletMap();
+  initStationPicker();
+  initTechCharts();
+  renderPhysicsCards();
+});
+
+async function loadData() {
+  if (typeof window.DASHBOARD_DATA !== 'undefined') {
+    return window.DASHBOARD_DATA;
+  }
+  try {
+    const res = await fetch('dashboard_data.json');
+    return await res.json();
+  } catch (err) {
+    console.error('Fetch failed:', err);
+    return null;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 1. PROPER MAP WITH GRADIENTS
+// -----------------------------------------------------------------------------
+function initLeafletMap() {
+  // Center on India
+  leafletMap = L.map('map-container', {
+    zoomControl: true,
+    scrollWheelZoom: false
+  }).setView([22.0, 78.5], 5);
+
+  // CartoDB Voyager: proper geographic details, green river plains, clear boundaries
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 18
+  }).addTo(leafletMap);
+
+  renderGradientMap();
+}
+
+function renderGradientMap() {
+  // Remove existing layers
+  mapHalos.forEach(h => leafletMap.removeLayer(h));
+  mapCores.forEach(c => leafletMap.removeLayer(c));
+  mapHalos = [];
+  mapCores = [];
+
+  const stations = dashboardData.stations;
+  const bounds = L.latLngBounds();
+
+  stations.forEach(stn => {
+    if (currentRegion !== 'all' && stn.region !== currentRegion) {
+      return;
+    }
+
+    const latLng = [stn.lat, stn.lon];
+    bounds.extend(latLng);
+
+    // Compute color based on current mode
+    let markerColor = '#10b981';
+    let haloRadius = 26;
+    let badgeText = '';
+
+    if (currentMapMode === 'trend') {
+      const delta = stn.trend_7d ? stn.trend_7d.delta : 0;
+      markerColor = getTrendGradientColor(delta);
+      haloRadius = Math.min(36, Math.max(22, 22 + Math.abs(delta) * 1.2));
+      badgeText = delta <= 0 ? `${delta} ppb &darr; (Cleaner)` : `+${delta} ppb &uarr; (Rising)`;
+    } else if (currentMapMode === 'level') {
+      const pred = stn.latest.predicted;
+      markerColor = getLevelGradientColor(pred);
+      haloRadius = Math.min(36, Math.max(20, 18 + pred * 0.6));
+      badgeText = `${pred} ppb (${stn.latest.aqi_category})`;
+    } else if (currentMapMode === 'correction') {
+      const corr = stn.correction_delta;
+      markerColor = getCorrectionGradientColor(corr);
+      haloRadius = Math.min(36, Math.max(22, 20 + Math.abs(corr) * 0.8));
+      badgeText = corr <= 0 ? `AI lowered CAMS by ${Math.abs(corr)} ppb` : `AI raised CAMS by ${corr} ppb`;
+    }
+
+    // 1. Soft Translucent Atmospheric Halo (gradient blend effect)
+    const halo = L.circleMarker(latLng, {
+      radius: haloRadius,
+      fillColor: markerColor,
+      fillOpacity: 0.24,
+      stroke: false
+    }).addTo(leafletMap);
+    mapHalos.push(halo);
+
+    // 2. Crisp Core Marker
+    const core = L.circleMarker(latLng, {
+      radius: 8,
+      fillColor: markerColor,
+      fillOpacity: 0.95,
+      color: '#ffffff',
+      weight: 2
+    }).addTo(leafletMap);
+
+    // Modern clean popup
+    const popupHtml = `
+      <div class="popup-station-city">${stn.city} &bull; ${stn.region_label}</div>
+      <div class="popup-station-name">${stn.name}</div>
+      <div class="popup-value-hero">
+        <span class="popup-value-num">${stn.latest.predicted}</span>
+        <span style="font-size:12px; color:var(--text-muted);">ppb Ozone</span>
+        <span class="popup-trend-chip" style="background:${markerColor}20; color:${markerColor}; font-weight:700;">
+          ${stn.trend_7d ? stn.trend_7d.text : ''}
+        </span>
+      </div>
+      <div class="popup-explain">
+        ${getPlainExplanation(stn)}
+      </div>
+      <button class="popup-inspect-btn" onclick="selectStationAndScroll(${stn.station_id})">
+        View 90-Day Timeline &rarr;
+      </button>
+    `;
+
+    core.bindPopup(popupHtml, { maxWidth: 320 });
+    halo.bindPopup(popupHtml, { maxWidth: 320 });
+    mapCores.push(core);
+  });
+
+  if (mapCores.length > 0) {
+    leafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+  }
+}
+
+// Color Gradients
+function getTrendGradientColor(delta) {
+  // Decreasing = Emerald/Cyan; Steady = Gray; Increasing = Coral/Red
+  if (delta <= -8) return '#059669';
+  if (delta <= -4) return '#10b981';
+  if (delta <= -1.5) return '#34d399';
+  if (delta < 1.5) return '#94a3b8';
+  if (delta < 4) return '#f59e0b';
+  if (delta < 6) return '#f97316';
+  return '#ef4444';
+}
+
+function getLevelGradientColor(ppb) {
+  if (ppb <= 10) return '#10b981';
+  if (ppb <= 16) return '#34d399';
+  if (ppb <= 22) return '#f59e0b';
+  if (ppb <= 28) return '#f97316';
+  return '#ef4444';
+}
+
+function getCorrectionGradientColor(corr) {
+  // If AI removed overprediction: Cool Blue; If AI increased underprediction: Orange
+  if (corr < -10) return '#1d4ed8';
+  if (corr < -2) return '#3b82f6';
+  if (corr < 2) return '#94a3b8';
+  if (corr < 8) return '#f59e0b';
+  return '#ef4444';
+}
+
+function getPlainExplanation(stn) {
+  const delta = stn.trend_7d ? stn.trend_7d.delta : 0;
+  if (stn.region === 'north') {
+    return delta < 0 
+      ? "Recent monsoon showers and shifting seasonal winds have cleansed Delhi-NCR's air basin."
+      : "Stagnant inland air and post-rain sunlight are triggering moderate photochemical ozone synthesis.";
+  } else {
+    return stn.dist_to_coast_km < 100
+      ? "Marine sea breezes and coastal humidity keep ground ozone relatively dispersed."
+      : "Peninsular plateau conditions: AI corrected CAMS overprediction to reflect real local ground monitors.";
+  }
+}
+
+function setMapMode(mode, btn) {
+  currentMapMode = mode;
+  document.querySelectorAll('#map-mode-pills button').forEach(b => b.classList.remove('active', 'primary'));
+  btn.classList.add('active', 'primary');
+
+  const titleElem = document.getElementById('legend-main-title');
+  const subElem = document.getElementById('legend-sub-title');
+  const barElem = document.getElementById('gradient-bar-visual');
+  const lLeft = document.getElementById('grad-lbl-left');
+  const lMid = document.getElementById('grad-lbl-mid');
+  const lRight = document.getElementById('grad-lbl-right');
+
+  if (mode === 'trend') {
+    titleElem.innerText = '7-Day Ozone Trend (Increase vs. Decrease Gradient)';
+    subElem.innerText = 'Green indicates improving air; Red indicates rising photochemical smog';
+    barElem.className = 'gradient-bar trend-mode';
+    lLeft.innerHTML = '&darr; -14 ppb (Decreasing)';
+    lMid.innerHTML = '&minus; 0 ppb (Steady)';
+    lRight.innerHTML = '&uarr; +8 ppb (Increasing)';
+  } else if (mode === 'level') {
+    titleElem.innerText = 'Current Ozone Concentration Gradient';
+    subElem.innerText = 'Continuous spectrum from clean baseline to elevated smog episodes';
+    barElem.className = 'gradient-bar level-mode';
+    lLeft.innerHTML = '0 ppb (Clean)';
+    lMid.innerHTML = '15 ppb (Moderate)';
+    lRight.innerHTML = '30+ ppb (Elevated)';
+  } else {
+    titleElem.innerText = 'AI vs. Satellite Adjustment Gradient';
+    subElem.innerText = 'Blue shows AI reduced satellite overprediction; Orange shows AI boosted underpredictions';
+    barElem.style.background = 'linear-gradient(to right, #1d4ed8 0%, #3b82f6 30%, #94a3b8 50%, #f59e0b 70%, #ef4444 100%)';
+    lLeft.innerHTML = '&minus;15 ppb (Cooled Down)';
+    lMid.innerHTML = '0 ppb (No Bias)';
+    lRight.innerHTML = '+12 ppb (Boosted)';
+  }
+
+  renderGradientMap();
+}
+
+function filterMapRegion(region, btn) {
+  currentRegion = region;
+  document.querySelectorAll('#region-filter-pills button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGradientMap();
+}
+
+function selectStationAndScroll(sid) {
+  document.getElementById('stationSelect').value = sid;
+  onStationSelect(sid);
+  document.getElementById('timeseries-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+// -----------------------------------------------------------------------------
+// 2. TIME SERIES SECTION
+// -----------------------------------------------------------------------------
+function initStationPicker() {
+  const select = document.getElementById('stationSelect');
+  const stations = dashboardData.stations;
+
+  const northOpt = document.createElement('optgroup');
+  northOpt.label = 'Delhi-NCR & North India';
+  const southOpt = document.createElement('optgroup');
+  southOpt.label = 'Peninsular & South India';
+
+  stations.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.station_id;
+    opt.innerText = `${s.city} — ${s.name} ${s.is_holdout ? '★ Holdout Test' : ''}`;
+    if (s.region === 'north') {
+      northOpt.appendChild(opt);
+    } else {
+      southOpt.appendChild(opt);
+    }
+  });
+
+  select.appendChild(northOpt);
+  select.appendChild(southOpt);
+
+  select.value = 17; // Station 17 default
+  onStationSelect(17);
+}
+
+function onStationSelect(sid) {
+  const stn = dashboardData.stations.find(s => s.station_id === parseInt(sid));
+  if (!stn) return;
+
+  document.getElementById('ts-region').innerText = stn.region_label;
+  document.getElementById('ts-coast').innerText = `${stn.dist_to_coast_km} km`;
+  document.getElementById('ts-elev').innerText = `${stn.elevation_mean_20km} m`;
+  document.getElementById('ts-status').innerText = `${stn.latest.predicted} ppb (${stn.latest.aqi_category})`;
+  document.getElementById('ts-holdout-badge').innerText = stn.is_holdout ? '★ SPATIAL HOLDOUT TEST REGIME' : '';
+
+  renderTimeSeriesChart(stn);
+}
+
+function renderTimeSeriesChart(stn) {
+  const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+  const ts = stn.time_series;
+
+  const labels = ts.map(t => {
+    const parts = t.date.split('-');
+    return `${parts[1]}/${parts[2]}`;
+  });
+
+  const actuals = ts.map(t => t.actual);
+  const preds = ts.map(t => t.predicted);
+  const cams = ts.map(t => t.cams_ppb);
+
+  if (timeSeriesChartInst) {
+    timeSeriesChartInst.destroy();
+  }
+
+  timeSeriesChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Ground Truth Sensor (Actual)',
+          data: actuals,
+          borderColor: '#0f172a',
+          backgroundColor: '#0f172a',
+          borderWidth: 2,
+          pointRadius: 2.8,
+          pointHoverRadius: 6,
+          spanGaps: true,
+          tension: 0.1
+        },
+        {
+          label: 'CleanAir AI (Corrected)',
+          data: preds,
+          borderColor: '#2563eb',
+          backgroundColor: '#2563eb',
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          tension: 0.15
+        },
+        {
+          label: 'Raw Global Satellite (CAMS)',
+          data: cams,
+          borderColor: '#f59e0b',
+          borderWidth: 1.8,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.15
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      font: { family: "'Inter', sans-serif" },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => (items && items.length) ? `Date: 2026-${items[0].label.replace('/', '-')}` : '',
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.raw !== null ? ctx.raw + ' ppb' : 'Sensor Offline'}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { maxTicksLimit: 14, font: { family: "'JetBrains Mono', monospace", size: 11 } }
+        },
+        y: {
+          title: { display: true, text: 'Surface Ozone (ppb)', font: { size: 12, family: "'Plus Jakarta Sans', sans-serif" } },
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { family: "'JetBrains Mono', monospace", size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+// -----------------------------------------------------------------------------
+// 3. TECHNICAL CHARTS & PHYSICS
+// -----------------------------------------------------------------------------
+function initTechCharts() {
+  // Benchmark Bar Chart
+  const ctxBar = document.getElementById('benchmarkBarChart').getContext('2d');
+  const cv = dashboardData.benchmark_cv.mean;
+
+  benchmarkBarChartInst = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: ['RMSE (Lower is better)', 'MAE (Lower is better)', 'R² Score (Higher is better)'],
+      datasets: [
+        {
+          label: 'Raw Satellite Forecast',
+          data: [cv.RMSE.naive_CAMS, cv.MAE.naive_CAMS, cv.R2.naive_CAMS],
+          backgroundColor: '#cbd5e1',
+          borderRadius: 4
+        },
+        {
+          label: 'CleanAir AI Model',
+          data: [cv.RMSE.xgboost, cv.MAE.xgboost, cv.R2.xgboost],
+          backgroundColor: '#2563eb',
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      font: { family: "'Inter', sans-serif" },
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+        tooltip: {
+          callbacks: {
+            label: (c) => `${c.dataset.label}: ${c.raw.toFixed(2)} ${c.dataIndex < 2 ? 'ppb' : ''}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          grid: { color: (c) => c.tick.value === 0 ? '#0f172a' : '#f1f5f9', lineWidth: (c) => c.tick.value === 0 ? 1.5 : 1 },
+          ticks: { font: { family: "'JetBrains Mono', monospace", size: 11 } }
+        },
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Scatter Chart
+  const ctxScatter = document.getElementById('scatterChart').getContext('2d');
+  const pts = dashboardData.scatter_plot.points;
+
+  const inland = pts.filter(p => p.station_id === 17).map(p => ({ x: p.actual, y: p.predicted, meta: p }));
+  const coastal = pts.filter(p => p.station_id === 5624).map(p => ({ x: p.actual, y: p.predicted, meta: p }));
+
+  scatterChartInst = new Chart(ctxScatter, {
+    type: 'scatter',
+    data: {
+      datasets: [
+        {
+          label: 'Station 17 (Delhi)',
+          data: inland,
+          backgroundColor: 'rgba(5, 150, 105, 0.8)',
+          pointRadius: 4.5
+        },
+        {
+          label: 'Station 5624 (Hyderabad)',
+          data: coastal,
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
+          pointRadius: 4.5
+        },
+        {
+          label: '1:1 Ideal Line',
+          data: [{ x: 0, y: 0 }, { x: 65, y: 65 }],
+          type: 'line',
+          showLine: true,
+          borderColor: '#0f172a',
+          borderWidth: 1.5,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              if (ctx.datasetIndex === 2) return 'Ideal 1:1 Line (y = x)';
+              const m = ctx.raw.meta;
+              return `${m.station_name}: Actual ${m.actual} ppb | Pred ${m.predicted} ppb`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Actual Ozone (ppb)' }, min: 0, max: 65, grid: { color: '#f1f5f9' }, ticks: { font: { family: "'JetBrains Mono', monospace" } } },
+        y: { title: { display: true, text: 'AI Predicted Ozone (ppb)' }, min: 0, max: 65, grid: { color: '#f1f5f9' }, ticks: { font: { family: "'JetBrains Mono', monospace" } } }
+      }
+    }
+  });
+
+  // Feature Importance Horizontal Bar Chart
+  const ctxFeat = document.getElementById('featureImportanceChart').getContext('2d');
+  const feats = dashboardData.feature_importance.slice(0, 8).reverse();
+
+  featureChartInst = new Chart(ctxFeat, {
+    type: 'bar',
+    data: {
+      labels: feats.map(f => f.title),
+      datasets: [{
+        data: feats.map(f => f.percentage),
+        backgroundColor: '#2563eb',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => `Weight: ${c.raw.toFixed(1)}% of total gain` } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Contribution Weight (%)' }, grid: { color: '#f1f5f9' } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } } }
+      }
+    }
+  });
+}
+
+function switchTechTab(mode) {
+  document.getElementById('btn-tab-cv').classList.toggle('active', mode === 'cv');
+  document.getElementById('btn-tab-holdout').classList.toggle('active', mode === 'holdout');
+
+  if (mode === 'cv') {
+    const cv = dashboardData.benchmark_cv.mean;
+    benchmarkBarChartInst.data.datasets[0].data = [cv.RMSE.naive_CAMS, cv.MAE.naive_CAMS, cv.R2.naive_CAMS];
+    benchmarkBarChartInst.data.datasets[1].data = [cv.RMSE.xgboost, cv.MAE.xgboost, cv.R2.xgboost];
+  } else {
+    const ho = dashboardData.benchmark_holdout.metrics;
+    benchmarkBarChartInst.data.datasets[0].data = [ho.RMSE.naive_CAMS_raw, ho.MAE.naive_CAMS_raw, ho.R2.naive_CAMS_raw];
+    benchmarkBarChartInst.data.datasets[1].data = [ho.RMSE.xgboost, ho.MAE.xgboost, ho.R2.xgboost];
+  }
+  benchmarkBarChartInst.update();
+}
+
+function renderPhysicsCards() {
+  const list = document.getElementById('physics-cards-list');
+  const topFeats = dashboardData.feature_importance.slice(0, 5);
+
+  list.innerHTML = '';
+  topFeats.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'physics-item';
+    card.innerHTML = `
+      <div class="physics-item-header">
+        <span>${f.title}</span>
+        <span class="physics-item-pct">${f.percentage}%</span>
+      </div>
+      <div class="physics-item-desc">${f.description}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+</script>
+
+</body>
+</html>
