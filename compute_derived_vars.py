@@ -1,7 +1,27 @@
+"""
+compute_derived_vars.py
+
+Processes CAMS netCDF datasets for North and South regional domains:
+1. Opens data_mlev.nc and data_sfc.nc for each region.
+2. Squeezes the model_level dimension.
+3. Computes valid_time coordinate = forecast_reference_time + forecast_period.
+4. Validates coordinate alignment between surface and model level files.
+5. Merges datasets with compat='no_conflicts' and selects forecast_period == '1 days'.
+6. Computes derived wind variables:
+   - wind_speed = sqrt(u10^2 + v10^2)
+   - wind_direction_deg = (270 - degrees(atan2(v10, u10))) % 360
+7. Saves north_3months_derived.nc and south_3months_derived.nc.
+"""
+
 import os
+import argparse
+import warnings
 from pathlib import Path
 import numpy as np
 import xarray as xr
+
+# Suppress engine warnings from plugins
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="xarray.backends.plugins")
 
 
 def load_region(folder: str | Path) -> xr.Dataset:
@@ -72,32 +92,68 @@ def compute_derived_wind_vars(ds: xr.Dataset) -> xr.Dataset:
 def main():
     base_dir = Path(__file__).resolve().parent
 
-    print("Loading and processing north_2weeks...")
-    ds_north = load_region(base_dir / "north_2weeks")
+    parser = argparse.ArgumentParser(description="Compute derived CAMS variables (wind speed, wind direction).")
+    parser.add_argument(
+        "--north-dir",
+        default=str(base_dir / "north_3months"),
+        help="Path to north regional directory (default: ./north_3months)",
+    )
+    parser.add_argument(
+        "--south-dir",
+        default=str(base_dir / "south_3months"),
+        help="Path to south regional directory (default: ./south_3months)",
+    )
+    parser.add_argument(
+        "--north-out",
+        default=str(base_dir / "north_3months_derived.nc"),
+        help="Path to save north derived netCDF (default: ./north_3months_derived.nc)",
+    )
+    parser.add_argument(
+        "--south-out",
+        default=str(base_dir / "south_3months_derived.nc"),
+        help="Path to save south derived netCDF (default: ./south_3months_derived.nc)",
+    )
+    args = parser.parse_args()
+
+    north_dir = Path(args.north_dir)
+    south_dir = Path(args.south_dir)
+    output_north = Path(args.north_out)
+    output_south = Path(args.south_out)
+
+    print("=" * 70)
+    print("           COMPUTE DERIVED VARIABLES (3-MONTH CAMS DATA)")
+    print("=" * 70)
+
+    print(f"\n[*] Loading and processing North region from: {north_dir.name}...")
+    ds_north = load_region(north_dir)
     ds_north = compute_derived_wind_vars(ds_north)
 
-    print("Loading and processing south_2weeks...")
-    ds_south = load_region(base_dir / "south_2weeks")
+    print(f"[*] Loading and processing South region from: {south_dir.name}...")
+    ds_south = load_region(south_dir)
     ds_south = compute_derived_wind_vars(ds_south)
 
-    output_north = base_dir / "north_2weeks_derived.nc"
-    output_south = base_dir / "south_2weeks_derived.nc"
-
-    print(f"Saving north dataset to {output_north.name}...")
+    print(f"\n[*] Saving North derived dataset to: {output_north.name}...")
     ds_north.to_netcdf(output_north)
+    print(f"[+] Saved {output_north.name} ({output_north.stat().st_size / (1024*1024):.2f} MB)")
 
-    print(f"Saving south dataset to {output_south.name}...")
+    print(f"[*] Saving South derived dataset to: {output_south.name}...")
     ds_south.to_netcdf(output_south)
+    print(f"[+] Saved {output_south.name} ({output_south.stat().st_size / (1024*1024):.2f} MB)")
 
-    print("\n--- Sanity Checks (First 5 Values) ---")
-    print("North 2 Weeks:")
-    print("  wind_speed (first 5 values):", ds_north["wind_speed"].values.flatten()[:5])
-    print("  wind_direction_deg (first 5 values):", ds_north["wind_direction_deg"].values.flatten()[:5])
+    print("\n--- Summary and Verification ---")
+    print(f"North 3 Months Derived:")
+    print(f"  Shape/Dims : {dict(ds_north.sizes)}")
+    print(f"  Valid Time : {ds_north.valid_time.values.min()} to {ds_north.valid_time.values.max()}")
+    print(f"  wind_speed (first 5) : {ds_north['wind_speed'].values.flatten()[:5].round(3)}")
+    print(f"  wind_dir   (first 5) : {ds_north['wind_direction_deg'].values.flatten()[:5].round(1)}")
 
-    print("\nSouth 2 Weeks:")
-    print("  wind_speed (first 5 values):", ds_south["wind_speed"].values.flatten()[:5])
-    print("  wind_direction_deg (first 5 values):", ds_south["wind_direction_deg"].values.flatten()[:5])
-    print("\nProcessing complete successfully.")
+    print(f"\nSouth 3 Months Derived:")
+    print(f"  Shape/Dims : {dict(ds_south.sizes)}")
+    print(f"  Valid Time : {ds_south.valid_time.values.min()} to {ds_south.valid_time.values.max()}")
+    print(f"  wind_speed (first 5) : {ds_south['wind_speed'].values.flatten()[:5].round(3)}")
+    print(f"  wind_dir   (first 5) : {ds_south['wind_direction_deg'].values.flatten()[:5].round(1)}")
+
+    print("\n[+] Derived variable computation completed successfully.\n")
 
 
 if __name__ == "__main__":

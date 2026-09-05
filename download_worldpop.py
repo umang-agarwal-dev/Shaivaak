@@ -4,6 +4,7 @@ import time
 import argparse
 from pathlib import Path
 import requests
+from tqdm import tqdm
 import rasterio
 
 # Base WorldPop REST API endpoints
@@ -19,9 +20,8 @@ def find_worldpop_url(iso3: str = "IND") -> tuple[str, str, str]:
     Returns:
         tuple[str, str, str]: (download_url, popyear, title)
     """
-    print(f"Querying WorldPop REST API for country code '{iso3}'...", flush=True)
+    print(f"[*] Querying WorldPop REST API for country code '{iso3}'...", flush=True)
 
-    # First, query the standard unconstrained 100m endpoint (wpgp)
     wpgp_url = f"{WORLDPOP_API_WPGP}?iso3={iso3}"
     selected_item = None
 
@@ -30,7 +30,6 @@ def find_worldpop_url(iso3: str = "IND") -> tuple[str, str, str]:
         response.raise_for_status()
         data = response.json().get("data", [])
 
-        # Filter items with valid files and sort by popyear descending
         valid_items = [
             item for item in data
             if item.get("files") and item.get("popyear")
@@ -38,24 +37,9 @@ def find_worldpop_url(iso3: str = "IND") -> tuple[str, str, str]:
         if valid_items:
             valid_items.sort(key=lambda x: int(x.get("popyear", 0)), reverse=True)
             selected_item = valid_items[0]
-            print(f"Found latest entry in wpgp: Year {selected_item.get('popyear')} - {selected_item.get('title')}", flush=True)
+            print(f"[*] Found latest entry in wpgp: Year {selected_item.get('popyear')} - {selected_item.get('title')}", flush=True)
     except Exception as e:
-        print(f"Warning: Failed querying {wpgp_url}: {e}", flush=True)
-
-    # Check if a newer unconstrained 100m dataset is available under other pop aliases (e.g. 2024)
-    try:
-        alias_url = f"{WORLDPOP_API_POP}/G2_UC_POP_2024_100m?iso3={iso3}"
-        r_2024 = requests.get(alias_url, timeout=15)
-        if r_2024.status_code == 200:
-            data_2024 = r_2024.json().get("data", [])
-            if data_2024 and data_2024[0].get("files"):
-                item_2024 = data_2024[0]
-                year_2024 = int(item_2024.get("popyear", 0))
-                current_year = int(selected_item.get("popyear", 0)) if selected_item else 0
-                if year_2024 > current_year:
-                    print(f"Discovered newer unconstrained dataset: Year {year_2024} ({item_2024.get('title')})", flush=True)
-    except Exception:
-        pass
+        print(f"[!] Warning: Failed querying {wpgp_url}: {e}", flush=True)
 
     if not selected_item:
         raise RuntimeError(f"Could not find any population datasets for ISO3 '{iso3}' in WorldPop API.")
@@ -70,78 +54,66 @@ def find_worldpop_url(iso3: str = "IND") -> tuple[str, str, str]:
 def download_file(
     url: str,
     output_path: Path,
-    chunk_size: int = 8192,
+    chunk_size: int = 1048576,  # 1 MB chunk size for maximum throughput
     force: bool = False,
 ) -> None:
     """
-    Downloads a file with requests using streaming so it does not load the whole
-    file into memory, writing chunks of size `chunk_size`.
+    Downloads a file with streaming using optimized 1 MB buffer chunks
+    and interactive tqdm progress reporting with percentage, speed, and ETA.
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Check remote file metadata via HEAD
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept-Encoding": "identity",
+    }
+
+    # Retrieve remote content-length
     expected_size = None
     try:
-        head_res = requests.head(url, timeout=15)
+        head_res = requests.head(url, headers=headers, timeout=15)
         if head_res.status_code == 200:
             expected_size = int(head_res.headers.get("content-length", 0))
     except Exception as e:
-        print(f"Note: Could not retrieve HEAD content-length: {e}", flush=True)
+        print(f"[!] Note: Could not retrieve HEAD content-length: {e}", flush=True)
 
+    # Check if already fully downloaded
     if output_path.exists() and not force:
         local_size = output_path.stat().st_size
         if expected_size and local_size == expected_size:
-            print(f"File already exists and matches remote size ({local_size / (1024*1024):.2f} MB). Skipping download.", flush=True)
-            return
-        elif local_size > 0 and expected_size is None:
-            print(f"File already exists ({local_size / (1024*1024):.2f} MB). Skipping download. Use --force to re-download.", flush=True)
+            print(f"[*] File already downloaded and verified ({local_size / (1024*1024):.2f} MB). Skipping.", flush=True)
             return
 
-    print(f"Starting download from:\n  {url}", flush=True)
-    print(f"Target location:\n  {output_path.resolve()}", flush=True)
+    print(f"[*] Starting download from:\n    {url}", flush=True)
+    print(f"[*] Saving to:\n    {output_path.resolve()}", flush=True)
     if expected_size:
-        print(f"Expected file size: {expected_size / (1024 * 1024):.2f} MB ({expected_size / (1024**3):.2f} GB)", flush=True)
+        print(f"[*] Total file size: {expected_size / (1024*1024):.2f} MB ({expected_size / (1024**3):.2f} GB)", flush=True)
+    print(f"[*] Buffer chunk size: {chunk_size / 1024:.0f} KB", flush=True)
 
     start_time = time.time()
-    downloaded_bytes = 0
-    last_print_time = start_time
-
-    with requests.get(url, stream=True, timeout=60) as response:
+    with requests.get(url, headers=headers, stream=True, timeout=60) as response:
         response.raise_for_status()
-        with open(output_path, "wb") as f:
+        total_length = int(response.headers.get("content-length", expected_size or 0))
+
+        with open(output_path, "wb") as f, tqdm(
+            desc="Downloading india_worldpop.tif",
+            total=total_length,
+            unit="B",
+            unit_scale=True,
+            unit_divisor=1024,
+            miniters=1,
+            dynamic_ncols=True,
+            leave=True,
+        ) as pbar:
             for chunk in response.iter_content(chunk_size=chunk_size):
                 if chunk:
                     f.write(chunk)
-                    downloaded_bytes += len(chunk)
+                    pbar.update(len(chunk))
 
-                    # Print progress every 5 seconds
-                    now = time.time()
-                    if now - last_print_time >= 5.0:
-                        elapsed = now - start_time
-                        speed_mb = (downloaded_bytes / (1024 * 1024)) / elapsed if elapsed > 0 else 0
-                        if expected_size:
-                            pct = (downloaded_bytes / expected_size) * 100
-                            print(
-                                f"  Progress: {pct:5.1f}% | "
-                                f"{downloaded_bytes / (1024*1024):.1f} / {expected_size / (1024*1024):.1f} MB | "
-                                f"Speed: {speed_mb:.2f} MB/s",
-                                flush=True,
-                            )
-                        else:
-                            print(
-                                f"  Progress: {downloaded_bytes / (1024*1024):.1f} MB downloaded | "
-                                f"Speed: {speed_mb:.2f} MB/s",
-                                flush=True,
-                            )
-                        last_print_time = now
-
-    elapsed_total = time.time() - start_time
-    avg_speed = (downloaded_bytes / (1024 * 1024)) / elapsed_total if elapsed_total > 0 else 0
-    print(
-        f"Download complete in {elapsed_total:.1f}s "
-        f"({downloaded_bytes / (1024*1024):.2f} MB at avg {avg_speed:.2f} MB/s).",
-        flush=True,
-    )
+    elapsed = time.time() - start_time
+    file_size = output_path.stat().st_size
+    speed = (file_size / (1024 * 1024)) / elapsed if elapsed > 0 else 0
+    print(f"\n[+] Download finished in {elapsed:.1f}s ({file_size / (1024*1024):.2f} MB @ avg {speed:.2f} MB/s).", flush=True)
 
 
 def verify_file_size(output_path: Path) -> int:
@@ -155,7 +127,7 @@ def verify_file_size(output_path: Path) -> int:
 
     size_mb = size_bytes / (1024 * 1024)
     size_gb = size_bytes / (1024 * 1024 * 1024)
-    print(f"\n[Verification] Downloaded file size: {size_bytes:,} bytes ({size_mb:.2f} MB / {size_gb:.2f} GB)", flush=True)
+    print(f"\n[+] Verification: File size is {size_bytes:,} bytes ({size_mb:.2f} MB / {size_gb:.2f} GB)", flush=True)
     return size_bytes
 
 
@@ -164,7 +136,9 @@ def inspect_raster(raster_path: Path) -> None:
     Opens the raster once with rasterio and prints its CRS, bounds, resolution,
     and checks if it covers India's extent (roughly lat 6-37, lon 68-97.5).
     """
-    print("\n--- Inspecting Raster with Rasterio ---", flush=True)
+    print("\n" + "=" * 55, flush=True)
+    print("      Rasterio GeoTIFF Inspection & Verification", flush=True)
+    print("=" * 55, flush=True)
     with rasterio.open(raster_path) as src:
         crs = src.crs
         bounds = src.bounds
@@ -172,27 +146,27 @@ def inspect_raster(raster_path: Path) -> None:
         width, height = src.width, src.height
         count = src.count
 
-        print(f"Driver:       {src.driver}", flush=True)
-        print(f"Dimensions:   {width} (width) x {height} (height), Bands: {count}", flush=True)
-        print(f"CRS:          {crs}", flush=True)
-        print(f"Resolution:   {res} (approx {res[0]*111320:.1f}m at equator)", flush=True)
-        print(f"Bounds:       Left={bounds.left:.4f}, Bottom={bounds.bottom:.4f}, Right={bounds.right:.4f}, Top={bounds.top:.4f}", flush=True)
+        print(f"Driver:        {src.driver}", flush=True)
+        print(f"Dimensions:    {width} x {height} pixels, Bands: {count}", flush=True)
+        print(f"CRS:           {crs}", flush=True)
+        print(f"Resolution:    {res[0]:.8f}, {res[1]:.8f} deg (~{res[0]*111320:.1f}m at equator)", flush=True)
+        print(f"Bounds:        Left={bounds.left:.4f}, Bottom={bounds.bottom:.4f}, Right={bounds.right:.4f}, Top={bounds.top:.4f}", flush=True)
 
-        # Check coverage against India's full extent (roughly lat 6-37, lon 68-97.5)
         india_lon_min, india_lon_max = 68.0, 97.5
         india_lat_min, india_lat_max = 6.0, 37.0
 
         covers_lon = (bounds.left <= india_lon_min) and (bounds.right >= india_lon_max)
         covers_lat = (bounds.bottom <= india_lat_min) and (bounds.top >= india_lat_max)
 
-        print("\nExtent Confirmation:", flush=True)
-        print(f"  Covers Longitude [{india_lon_min}, {india_lon_max}]: {'YES' if covers_lon else 'PARTIAL'} (Bounds: {bounds.left:.2f} to {bounds.right:.2f})", flush=True)
-        print(f"  Covers Latitude  [{india_lat_min}, {india_lat_max}]: {'YES' if covers_lat else 'PARTIAL'} (Bounds: {bounds.bottom:.2f} to {bounds.top:.2f})", flush=True)
+        print("\nExtent Check against India (lat 6-37, lon 68-97.5):", flush=True)
+        print(f"  Longitude [{india_lon_min}, {india_lon_max}]: {'COVERS FULLY' if covers_lon else 'PARTIAL'}", flush=True)
+        print(f"  Latitude  [{india_lat_min}, {india_lat_max}]: {'COVERS FULLY' if covers_lat else 'PARTIAL'}", flush=True)
 
         if covers_lon and covers_lat:
             print("  -> CONFIRMED: GeoTIFF covers the full geographic extent of India.", flush=True)
         else:
-            print("  -> NOTE: Covers India coordinates roughly within boundaries.", flush=True)
+            print("  -> Covers India bounds roughly within coordinate boundaries.", flush=True)
+    print("=" * 55 + "\n", flush=True)
 
 
 def main():
@@ -205,8 +179,8 @@ def main():
     parser.add_argument(
         "--chunk-size",
         type=int,
-        default=8192,
-        help="Streaming chunk size in bytes (default: 8192)",
+        default=1048576,  # 1 MB default
+        help="Streaming chunk size in bytes (default: 1048576 = 1 MB)",
     )
     parser.add_argument(
         "--force",
@@ -222,13 +196,13 @@ def main():
 
     # Step 1: Find URL via WorldPop REST API
     download_url, year, title = find_worldpop_url(iso3="IND")
-    print(f"\nSelected WorldPop Dataset:", flush=True)
-    print(f"  Title: {title}", flush=True)
-    print(f"  Year:  {year}", flush=True)
-    print(f"  URL:   {download_url}", flush=True)
+    print(f"\n[*] Selected WorldPop Dataset:", flush=True)
+    print(f"    Title: {title}", flush=True)
+    print(f"    Year:  {year}", flush=True)
+    print(f"    URL:   {download_url}", flush=True)
 
     if args.dry_run:
-        print("\nDry run requested. Exiting without downloading.", flush=True)
+        print("\n[*] Dry run requested. Exiting without downloading.", flush=True)
         return
 
     output_path = Path(args.output).resolve()

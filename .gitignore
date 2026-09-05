@@ -1,6 +1,25 @@
-venv/*
+﻿# Python virtual environments & bytecode
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment configuration
+.env
+
+# Large raw & derived NetCDF / GRIB / raster datasets
 *.nc
 *.grib
-.env
+*.grib2
+*.tif
+*.tiff
+data/
+north_*/
+south_*/
+
+# Ignore all CSV files except the main final training dataset
 *.csv
-data/*
+!final_training_table.csv
+!results_summary.csv
