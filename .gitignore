@@ -3,3 +3,4 @@ venv/*
 *.grib
 .env
 *.csv
+data/*
