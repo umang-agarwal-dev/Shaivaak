@@ -17,8 +17,12 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
-  <!-- Pre-exported Data Bundle (guarantees zero-CORS offline execution via file://) -->
+  <!-- Pre-exported Data Bundles (guarantees zero-CORS offline execution via file://) -->
   <script src="dashboard_data.js"></script>
+  <script src="daily_map_timeline.js"></script>
+  <script src="india_states_data.js"></script>
+  <script src="neighbor_countries_data.js"></script>
+  <script src="grid_predictions.js"></script>
 
   <style>
     :root {
@@ -59,16 +63,16 @@
     .container {
       max-width: 1220px;
       margin: 0 auto;
-      padding: 48px 32px 96px 32px;
+      padding: 24px 28px 64px 28px;
     }
 
     /* Section Spacing & Headers */
     .section-wrap {
-      margin-top: 56px;
+      margin-top: 36px;
     }
 
     .section-heading-group {
-      margin-bottom: 24px;
+      margin-bottom: 18px;
     }
 
     .section-eyebrow {
@@ -78,32 +82,32 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--primary);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .section-title {
       font-family: var(--font-display);
-      font-size: 26px;
-      font-weight: 700;
+      font-size: 24px;
+      font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.02em;
     }
 
     .section-description {
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13.5px;
       max-width: 760px;
-      margin-top: 6px;
-      line-height: 1.55;
+      margin-top: 4px;
+      line-height: 1.5;
     }
 
-    /* 1. NON-TECHNICAL HERO HEADER */
+    /* 1. NON-TECHNICAL HERO HEADER (COMPACT & CLEAN) */
     .hero-header {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 36px 40px;
-      margin-bottom: 24px;
+      padding: 24px 30px;
+      margin-bottom: 20px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.03);
     }
 
@@ -112,15 +116,15 @@
       align-items: center;
       gap: 8px;
       font-family: var(--font-display);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       color: var(--primary);
       background: var(--primary-light);
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 20px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .hero-pulse {
@@ -288,7 +292,7 @@
     }
 
     #map-container {
-      height: 540px;
+      height: 480px;
       width: 100%;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -297,9 +301,199 @@
       z-index: 1;
     }
 
+    @media (max-width: 768px) {
+      #map-container {
+        height: 390px;
+      }
+    }
+
+    /* Date Controller & Timeline Console */
+    .timeline-console-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .timeline-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .timeline-date-hero {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-calendar-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .timeline-date-text {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .timeline-day-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      background: var(--surface-subtle);
+      color: var(--text-secondary);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .timeline-kpis-strip {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+
+    .timeline-kpi-item {
+      padding: 4px 10px;
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+
+    .timeline-kpi-item strong {
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    .timeline-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-step {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-step:hover {
+      background: var(--surface-subtle);
+      border-color: var(--primary);
+    }
+
+    .btn-play-pause {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-play-pause:hover {
+      background: var(--primary-dark);
+    }
+
+    .timeline-slider-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 220px;
+    }
+
+    .timeline-range-input {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #cbd5e1;
+      outline: none;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+
+    .timeline-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-muted);
+    }
+
+    .timeline-presets-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 11px;
+      flex-wrap: wrap;
+    }
+
+    .preset-chip {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 5px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .preset-chip.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
     /* Gradient Legend Strip */
     .map-gradient-legend-wrap {
-      margin-top: 16px;
+      margin-top: 14px;
       padding: 12px 16px;
       background: var(--surface-subtle);
       border: 1px solid var(--border);
@@ -308,7 +502,7 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 14px;
     }
 
     .legend-title-box {
@@ -330,8 +524,8 @@
 
     .gradient-bar-container {
       flex: 1;
-      max-width: 520px;
-      min-width: 260px;
+      max-width: 440px;
+      min-width: 220px;
     }
 
     .gradient-bar {
@@ -346,19 +540,71 @@
     }
 
     .gradient-bar.level-mode {
-      background: linear-gradient(to right, #10b981 0%, #34d399 25%, #f59e0b 60%, #ef4444 100%);
+      background: linear-gradient(to right, #10b981 0%, #84cc16 25%, #eab308 50%, #f97316 75%, #ef4444 100%);
     }
 
     .gradient-labels {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 10.5px;
       font-family: var(--font-mono);
       color: var(--text-secondary);
       margin-top: 4px;
     }
 
-    /* Leaflet Popup Styling */
+    .state-inspector-badge {
+      font-size: 12px;
+      padding: 6px 12px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 440px;
+      line-height: 1.4;
+    }
+
+    .layer-toggle-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .layer-toggle-chip input {
+      accent-color: var(--primary);
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Leaflet Tooltips & Popups */
+    .leaflet-tooltip.state-hover-tooltip {
+      background: rgba(15, 23, 42, 0.9);
+      color: #f8fafc;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      padding: 6px 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .leaflet-tooltip.neighbor-tooltip {
+      background: rgba(51, 65, 85, 0.85);
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      font-family: var(--font-display);
+      font-size: 11px;
+      padding: 3px 8px;
+    }
+
     .leaflet-popup-content-wrapper {
       border-radius: 8px;
       box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15);
@@ -680,59 +926,138 @@
     </nav>
   </header>
 
-  <!-- 2. MAP SECTION: PROPER MAP TILES & GRADIENT VISUALIZATION -->
+  <!-- 2. MAP SECTION: INTERACTIVE LEAFLET TIMELINE & GRADIENT MAP -->
   <section class="section-wrap" id="map-section">
     <div class="section-heading-group">
-      <div class="section-eyebrow">Geographic Coverage</div>
-      <h2 class="section-title">National Air Quality & Trend Map</h2>
-      <p class="section-description">
-        Explore surface ozone across all 20 stations in India. Use the gradient toggle below to visualize weekly increases vs. decreases or absolute air quality intensity.
-      </p>
+      <div class="section-eyebrow">National Spatial Intelligence</div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+            <h2 class="section-title" style="letter-spacing: -0.02em; font-size: 28px; margin-bottom: 4px;">
+              Pan-India Ozone Surface Map
+            </h2>
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: 600;">92-Day Continuous Atmospheric Inference</span>
+          </div>
+          <p class="section-description" style="margin-bottom: 0;">
+            Interactive geospatial model across all 36 Indian states and union territories, powered by free Leaflet/CartoDB mapping. Neighboring countries are displayed with clean unmodeled outlines. Scrub dates below to track photochemical smog dynamics across the full summer-monsoon season.
+          </p>
+        </div>
+      </div>
     </div>
 
-    <div class="map-panel">
-      <!-- Controls Toolbar -->
-      <div class="map-controls-bar">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Map Visualization:</span>
-          <div class="pill-group" id="map-mode-pills">
-            <button class="pill-btn active primary" onclick="setMapMode('trend', this)">Weekly Trend (Increase vs Decrease)</button>
-            <button class="pill-btn" onclick="setMapMode('level', this)">Ozone Concentration</button>
-            <button class="pill-btn" onclick="setMapMode('correction', this)">AI vs Satellite Adjustment</button>
-          </div>
+    <!-- Date Control & Scrubber Console -->
+    <div class="timeline-console-card">
+      <div class="timeline-top-row">
+        <div class="timeline-date-hero">
+          <span class="timeline-calendar-icon">📅</span>
+          <span class="timeline-date-text" id="currentDateDisplay">Sunday, 06 Sep 2026</span>
+          <span class="timeline-day-badge" id="dayIndexBadge">Day 92 of 92 (Latest Forecast)</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">Focus:</span>
-          <div class="pill-group" id="region-filter-pills">
-            <button class="pill-btn active" onclick="filterMapRegion('all', this)">All (20)</button>
-            <button class="pill-btn" onclick="filterMapRegion('north', this)">Delhi-NCR</button>
-            <button class="pill-btn" onclick="filterMapRegion('south', this)">South India</button>
+        <div class="timeline-kpis-strip">
+          <div class="timeline-kpi-item">National Avg: <strong id="kpi-nat-avg">13.8 ppb</strong></div>
+          <div class="timeline-kpi-item">Peak Smog: <strong id="kpi-hotspot" style="color: #dc2626;">Delhi-NCR (26.8 ppb)</strong></div>
+          <div class="timeline-kpi-item">Cleanest Air: <strong id="kpi-cleanest" style="color: #059669;">Kerala (7.8 ppb)</strong></div>
+        </div>
+      </div>
+
+      <div class="timeline-controls-row">
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-step" id="btn-step-prev" onclick="stepTimeline(-1)" title="Previous Day">⏮ Prev</button>
+          <button class="btn-play-pause" id="btn-play-pause" onclick="toggleTimelinePlay()">
+            <span id="play-icon">▶</span> <span id="play-label">Play 92-Day Season</span>
+          </button>
+          <button class="btn-step" id="btn-step-next" onclick="stepTimeline(1)" title="Next Day">Next ⏭</button>
+        </div>
+
+        <div class="timeline-slider-wrap">
+          <input type="range" id="timelineSlider" class="timeline-range-input" min="0" max="91" value="91" oninput="seekTimelineDate(parseInt(this.value))">
+          <div class="timeline-ticks">
+            <span>07 Jun (Start)</span>
+            <span>01 Jul</span>
+            <span>25 Jul (Monsoon Peak)</span>
+            <span>15 Aug</span>
+            <span>06 Sep (Latest)</span>
           </div>
         </div>
       </div>
 
-      <!-- Proper Leaflet Map Container -->
+      <div class="timeline-presets-row">
+        <span style="font-weight: 700; color: var(--text-secondary); text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.05em;">Key Atmospheric Windows:</span>
+        <button class="preset-chip" onclick="seekTimelineDate(0)">07 Jun &bull; Early Summer Peak</button>
+        <button class="preset-chip" onclick="seekTimelineDate(20)">27 Jun &bull; Monsoon Inset</button>
+        <button class="preset-chip" onclick="seekTimelineDate(48)">25 Jul &bull; Heavy Rain Washout</button>
+        <button class="preset-chip" onclick="seekTimelineDate(69)">15 Aug &bull; Mid-August Baseline</button>
+        <button class="preset-chip active" id="chip-latest" onclick="seekTimelineDate(91)" style="font-weight: 700; border-color: var(--primary); color: var(--primary);">⚡ 06 Sep &bull; Today's Live Prediction</button>
+      </div>
+    </div>
+
+    <!-- Map Container & Visual Controls -->
+    <div class="map-panel">
+      <!-- Secondary Toolbar: Metrics & Layer Toggles -->
+      <div class="map-controls-bar">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Map Display:</span>
+          <div class="pill-group" id="map-mode-pills">
+            <button class="pill-btn active primary" id="btn-mode-level" onclick="setMapMode('level', this)">
+              🌡️ Ozone Concentration (ppb)
+            </button>
+            <button class="pill-btn" id="btn-mode-trend" onclick="setMapMode('trend', this)">
+              📈 7-Day Trend (Delta)
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <label class="layer-toggle-chip" title="Continuous nationwide AI inference raster evaluated on CAMS meteorology">
+            <input type="checkbox" id="chk-ai-heatmap" checked onchange="toggleAiHeatmap(this.checked)">
+            <span>🔥 AI Prediction Heatmap</span>
+          </label>
+          <label class="layer-toggle-chip" title="State-level administrative borders and regional hover inspection">
+            <input type="checkbox" id="chk-states" checked onchange="toggleStateBoundaries(this.checked)">
+            <span>State Regions</span>
+          </label>
+          <label class="layer-toggle-chip" title="Active ground monitoring stations">
+            <input type="checkbox" id="chk-stations" checked onchange="toggleStationMarkers(this.checked)">
+            <span>20 Ground Stations</span>
+          </label>
+          <label class="layer-toggle-chip" title="Unmodeled boundary outlines for neighboring countries">
+            <input type="checkbox" id="chk-neighbors" checked onchange="toggleNeighborOutlines(this.checked)">
+            <span>Neighbor Outlines</span>
+          </label>
+          <button class="pill-btn" onclick="resetMapView()" style="padding: 4px 10px; font-size: 11px;">
+            ↺ Reset View
+          </button>
+        </div>
+      </div>
+
+      <!-- Proper Leaflet Map Container (480px, responsive, fitting viewport) -->
       <div id="map-container"></div>
 
-      <!-- Continuous Gradient Legend Bar -->
+      <!-- Live Gradient Legend & Hovered State Inspector -->
       <div class="map-gradient-legend-wrap">
         <div class="legend-title-box">
-          <span class="legend-main-title" id="legend-main-title">7-Day Ozone Trend (Increase vs. Decrease Gradient)</span>
-          <span class="legend-sub-title" id="legend-sub-title">Green indicates improving air; Red indicates rising photochemical smog</span>
+          <span class="legend-main-title" id="legend-main-title">Ozone Concentration Gradient (Absolute Level)</span>
+          <span class="legend-sub-title" id="legend-sub-title">Continuous spectrum from clean baseline to elevated photochemical smog</span>
         </div>
 
         <div class="gradient-bar-container">
-          <div class="gradient-bar trend-mode" id="gradient-bar-visual"></div>
-          <div class="gradient-labels" id="gradient-labels">
-            <span id="grad-lbl-left">&darr; -14 ppb (Decreasing)</span>
-            <span id="grad-lbl-mid">&minus; 0 ppb (Steady)</span>
-            <span id="grad-lbl-right">&uarr; +8 ppb (Increasing)</span>
+          <div class="gradient-bar level-mode" id="gradient-bar-visual"></div>
+          <div class="gradient-labels">
+            <span id="grad-lbl-left">0 ppb (Clean)</span>
+            <span id="grad-lbl-mid">16 ppb (Moderate)</span>
+            <span id="grad-lbl-right">28+ ppb (Hotspot)</span>
           </div>
+        </div>
+
+        <!-- Live State Info Badge -->
+        <div class="state-inspector-badge" id="state-inspector-badge">
+          <span style="color: var(--text-muted);">Hover/click any state or station for details</span>
         </div>
       </div>
     </div>
   </section>
+
 
   <!-- 3. TIME SERIES SECTION: STATION TRAJECTORY -->
   <section class="section-wrap" id="timeseries-section">
@@ -867,10 +1192,17 @@
 <script>
 let dashboardData = null;
 let leafletMap = null;
-let mapHalos = [];
-let mapCores = [];
-let currentMapMode = 'trend'; // 'trend', 'level', or 'correction'
-let currentRegion = 'all';
+let indiaStatesLayer = null;
+let neighborLayer = null;
+let stationMarkersGroup = null;
+let aiHeatmapLayer = null;
+
+let timelineData = [];
+let currentDayIndex = 91; // Default to latest day (Sep 06)
+let isPlaying = false;
+let playTimer = null;
+let currentMapMode = 'level'; // 'level' (ozone concentration ppb) or 'trend' (7-day delta)
+let hoveredStateName = null;
 
 let timeSeriesChartInst = null;
 let benchmarkBarChartInst = null;
@@ -882,6 +1214,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!dashboardData) {
     alert('Could not load dashboard data. Please check predictions.json or dashboard_data.js.');
     return;
+  }
+
+  // Load precomputed 92-day timeline
+  if (typeof window.DAILY_MAP_TIMELINE !== 'undefined') {
+    timelineData = window.DAILY_MAP_TIMELINE;
   }
 
   initLeafletMap();
@@ -904,154 +1241,377 @@ async function loadData() {
 }
 
 // -----------------------------------------------------------------------------
-// 1. PROPER MAP WITH GRADIENTS
+// 1. MAP SECTION: INTERACTIVE LEAFLET TIMELINE & REGIONAL GRADIENTS
 // -----------------------------------------------------------------------------
 function initLeafletMap() {
-  // Center on India
+  // Free Leaflet map instance initialized with CartoDB Voyager tiles (100% free, no API key)
   leafletMap = L.map('map-container', {
     zoomControl: true,
     scrollWheelZoom: false
-  }).setView([22.0, 78.5], 5);
+  }).setView([22.5, 82.0], 5);
 
-  // CartoDB Voyager: proper geographic details, green river plains, clear boundaries
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 18
+  // 100% Free Esri Light Gray Canvas basemap (Zero API key required, zero watermark)
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16
   }).addTo(leafletMap);
 
-  renderGradientMap();
+  stationMarkersGroup = L.layerGroup().addTo(leafletMap);
+
+  // 1. Neighboring Countries Layer (Crisp outlines, zero prediction outside India)
+  initNeighborLayer();
+
+  // 2. Continuous Nationwide AI Ozone Hotspot Prediction Raster (Trained XGBoost on CAMS meteorology)
+  initAiHeatmapLayer();
+
+  // 3. India States GeoJSON Layer (Full gradient coverage across all 36 states/UTs)
+  initIndiaStatesLayer();
+
+  // 4. Station Markers
+  initStationMarkers();
+
+  // Initialize to latest forecast day (Today: 06 Sep 2026)
+  if (timelineData.length > 0) {
+    seekTimelineDate(timelineData.length - 1);
+  } else {
+    seekTimelineDate(91);
+  }
 }
 
-function renderGradientMap() {
-  // Remove existing layers
-  mapHalos.forEach(h => leafletMap.removeLayer(h));
-  mapCores.forEach(c => leafletMap.removeLayer(c));
-  mapHalos = [];
-  mapCores = [];
+function initNeighborLayer() {
+  if (typeof window.NEIGHBOR_COUNTRIES_GEOJSON === 'undefined') {
+    console.warn('Neighbor countries GeoJSON not loaded.');
+    return;
+  }
 
-  const stations = dashboardData.stations;
-  const bounds = L.latLngBounds();
-
-  stations.forEach(stn => {
-    if (currentRegion !== 'all' && stn.region !== currentRegion) {
-      return;
+  neighborLayer = L.geoJSON(window.NEIGHBOR_COUNTRIES_GEOJSON, {
+    style: {
+      fillColor: '#f8fafc',
+      fillOpacity: 0.45,
+      color: '#94a3b8',
+      weight: 1.2,
+      dashArray: '3, 4'
+    },
+    onEachFeature: function (feature, layer) {
+      const name = feature.properties.name || 'Neighboring Region';
+      layer.bindTooltip(`<strong>${name}</strong><br><span style="color:#64748b;font-size:11px;">Neighboring Country (Unmodeled Boundary)</span>`, {
+        className: 'neighbor-tooltip',
+        direction: 'auto',
+        sticky: true
+      });
     }
+  }).addTo(leafletMap);
+}
 
+function initAiHeatmapLayer() {
+  // Continuous nationwide AI prediction raster (Lat 6.5 to 37.2, Lon 68.0 to 97.5)
+  const bounds = [[6.5, 68.0], [37.2, 97.5]];
+  aiHeatmapLayer = L.imageOverlay('india_ozone_hotspots.png', bounds, {
+    opacity: 0.78,
+    interactive: false
+  }).addTo(leafletMap);
+}
+
+function toggleAiHeatmap(visible) {
+  if (!leafletMap || !aiHeatmapLayer) return;
+  if (visible) {
+    aiHeatmapLayer.addTo(leafletMap);
+    if (indiaStatesLayer) indiaStatesLayer.bringToFront();
+    if (stationMarkersGroup) stationMarkersGroup.bringToFront();
+  } else {
+    leafletMap.removeLayer(aiHeatmapLayer);
+  }
+  if (indiaStatesLayer) {
+    indiaStatesLayer.eachLayer(layer => {
+      const sName = layer.feature.properties.NAME_1;
+      layer.setStyle(getIndiaStateStyle(sName));
+    });
+  }
+}
+
+function toggleStateBoundaries(visible) {
+  if (!leafletMap || !indiaStatesLayer) return;
+  if (visible) {
+    indiaStatesLayer.addTo(leafletMap);
+    if (stationMarkersGroup) stationMarkersGroup.bringToFront();
+  } else {
+    leafletMap.removeLayer(indiaStatesLayer);
+  }
+}
+
+const REGIONAL_TERRAIN_EXPLANATIONS = {
+  "National Capital Territory of Delhi": "Himalayan wall inversion traps vehicular NOx and VOCs; intense midday solar insolation leads to photochemical ozone spikes.",
+  "Delhi": "Himalayan wall inversion traps vehicular NOx and VOCs; intense midday solar insolation leads to photochemical ozone spikes.",
+  "Uttar Pradesh": "Gangetic shallow nocturnal boundary layer traps precursor pool leading to midday ozone surges downwind of Delhi.",
+  "Bihar": "Deep Gangetic trough acts as an atmospheric drainage sink for regional precursor gases transported along the foothills.",
+  "Punjab": "High agricultural precursor VOCs trapped against the Shivalik footwall under calm post-rain skies.",
+  "Haryana": "Inland stagnation basin with elevated photochemistry during clear post-rain periods.",
+  "Rajasthan": "Arid convective mixing provides deep boundary dispersion, keeping ozone moderate despite intense heat.",
+  "Gujarat": "Gulf of Khambhat maritime breezes dilute urban coastal emissions.",
+  "Maharashtra": "Konkan land-sea breeze clears coastal corridor; Western Ghats shelter inner plateau.",
+  "Karnataka": "High-altitude Deccan plateau (920m ASL) and vigorous Peninsular winds maintain low, clean baseline ozone.",
+  "Telangana": "Deccan plateau aerated by seasonal monsoon winds; AI corrected global satellite overpredictions.",
+  "Tamil Nadu": "Bay of Bengal maritime air and high coastal humidity keep ground ozone low and stable.",
+  "Kerala": "Pristine maritime inflow combined with dense Western Ghats canopy scavenges reactive oxidants.",
+  "Jammu and Kashmir": "Alpine valleys with high catabatic ventilation and minimal precursor emissions.",
+  "Himachal Pradesh": "Mountain slope breezes disperse precursors; clean Himalayan background air.",
+  "Uttarakhand": "Orographic rainfall washes out photochemical intermediates.",
+  "West Bengal": "Deltaic maritime humidity and frequent rain washout maintain moderate ozone levels.",
+  "Assam": "Brahmaputra river corridor with heavy forest canopy deposition maintains pristine air."
+};
+
+function initIndiaStatesLayer() {
+  if (typeof window.INDIA_STATES_GEOJSON === 'undefined') {
+    console.warn('India states GeoJSON not loaded.');
+    return;
+  }
+
+  indiaStatesLayer = L.geoJSON(window.INDIA_STATES_GEOJSON, {
+    style: function (feature) {
+      return getIndiaStateStyle(feature.properties.NAME_1);
+    },
+    onEachFeature: function (feature, layer) {
+      const stateName = feature.properties.NAME_1;
+
+      layer.on({
+        mouseover: function (e) {
+          hoveredStateName = stateName;
+          const l = e.target;
+          l.setStyle({
+            weight: 2.5,
+            color: '#0f172a',
+            fillOpacity: 0.72
+          });
+          l.bringToFront();
+          if (stationMarkersGroup) stationMarkersGroup.bringToFront();
+          updateStateInspector(stateName);
+        },
+        mouseout: function (e) {
+          hoveredStateName = null;
+          indiaStatesLayer.resetStyle(e.target);
+          updateStateInspector();
+        },
+        click: function (e) {
+          hoveredStateName = stateName;
+          updateStateInspector(stateName);
+        }
+      });
+    }
+  }).addTo(leafletMap);
+}
+
+function getIndiaStateStyle(stateName) {
+  if (!timelineData || !timelineData[currentDayIndex]) {
+    return { fillColor: '#10b981', fillOpacity: 0.72, color: '#ffffff', weight: 1 };
+  }
+
+  const dayRec = timelineData[currentDayIndex];
+  const sData = dayRec.states[stateName];
+  if (!sData) {
+    return { fillColor: '#94a3b8', fillOpacity: 0.5, color: '#ffffff', weight: 1 };
+  }
+
+  let fillColor = '#10b981';
+  if (currentMapMode === 'trend') {
+    fillColor = getTrendGradientColor(sData.trend_7d);
+  } else {
+    fillColor = getLevelGradientColor(sData.pred);
+  }
+
+  const heatmapOn = document.getElementById('chk-ai-heatmap') ? document.getElementById('chk-ai-heatmap').checked : true;
+
+  return {
+    fillColor: fillColor,
+    fillOpacity: heatmapOn ? 0.35 : 0.76,
+    color: heatmapOn ? '#334155' : '#ffffff',
+    weight: heatmapOn ? 1.2 : 1.0
+  };
+}
+
+function initStationMarkers() {
+  stationMarkersGroup.clearLayers();
+  if (!dashboardData || !dashboardData.stations) return;
+
+  const dayRec = timelineData[currentDayIndex];
+
+  dashboardData.stations.forEach(stn => {
     const latLng = [stn.lat, stn.lon];
-    bounds.extend(latLng);
-
-    // Compute color based on current mode
-    let markerColor = '#10b981';
-    let haloRadius = 26;
-    let badgeText = '';
-
-    if (currentMapMode === 'trend') {
-      const delta = stn.trend_7d ? stn.trend_7d.delta : 0;
-      markerColor = getTrendGradientColor(delta);
-      haloRadius = Math.min(36, Math.max(22, 22 + Math.abs(delta) * 1.2));
-      badgeText = delta <= 0 ? `${delta} ppb &darr; (Cleaner)` : `+${delta} ppb &uarr; (Rising)`;
-    } else if (currentMapMode === 'level') {
-      const pred = stn.latest.predicted;
-      markerColor = getLevelGradientColor(pred);
-      haloRadius = Math.min(36, Math.max(20, 18 + pred * 0.6));
-      badgeText = `${pred} ppb (${stn.latest.aqi_category})`;
-    } else if (currentMapMode === 'correction') {
-      const corr = stn.correction_delta;
-      markerColor = getCorrectionGradientColor(corr);
-      haloRadius = Math.min(36, Math.max(22, 20 + Math.abs(corr) * 0.8));
-      badgeText = corr <= 0 ? `AI lowered CAMS by ${Math.abs(corr)} ppb` : `AI raised CAMS by ${corr} ppb`;
+    let stnDay = null;
+    if (dayRec && dayRec.stations) {
+      stnDay = dayRec.stations.find(s => s.id === stn.station_id);
     }
 
-    // 1. Soft Translucent Atmospheric Halo (gradient blend effect)
-    const halo = L.circleMarker(latLng, {
-      radius: haloRadius,
-      fillColor: markerColor,
-      fillOpacity: 0.24,
-      stroke: false
-    }).addTo(leafletMap);
-    mapHalos.push(halo);
+    const predVal = stnDay ? stnDay.pred : stn.latest.predicted;
+    const trendVal = stnDay ? stnDay.trend_7d : (stn.trend_7d ? stn.trend_7d.delta : 0);
+    const actualVal = stnDay && stnDay.actual !== null ? `${stnDay.actual} ppb` : 'Sensor Offline';
+    const camsVal = stnDay && stnDay.cams !== null ? `${stnDay.cams} ppb` : 'N/A';
 
-    // 2. Crisp Core Marker
+    let markerColor = '#10b981';
+    if (currentMapMode === 'trend') {
+      markerColor = getTrendGradientColor(trendVal);
+    } else {
+      markerColor = getLevelGradientColor(predVal);
+    }
+
+    // 1. Outer Translucent Halo
+    const halo = L.circleMarker(latLng, {
+      radius: 20,
+      fillColor: markerColor,
+      fillOpacity: 0.28,
+      stroke: false
+    });
+
+    // 2. Inner Solid Core
     const core = L.circleMarker(latLng, {
-      radius: 8,
+      radius: 6.5,
       fillColor: markerColor,
       fillOpacity: 0.95,
       color: '#ffffff',
       weight: 2
-    }).addTo(leafletMap);
+    });
 
-    // Modern clean popup
     const popupHtml = `
       <div class="popup-station-city">${stn.city} &bull; ${stn.region_label}</div>
       <div class="popup-station-name">${stn.name}</div>
       <div class="popup-value-hero">
-        <span class="popup-value-num">${stn.latest.predicted}</span>
+        <span class="popup-value-num">${predVal}</span>
         <span style="font-size:12px; color:var(--text-muted);">ppb Ozone</span>
         <span class="popup-trend-chip" style="background:${markerColor}20; color:${markerColor}; font-weight:700;">
-          ${stn.trend_7d ? stn.trend_7d.text : ''}
+          ${trendVal <= 0 ? trendVal + ' ppb &darr;' : '+' + trendVal + ' ppb &uarr;'}
         </span>
       </div>
-      <div class="popup-explain">
-        ${getPlainExplanation(stn)}
+      <div style="font-size:11.5px; color:var(--text-secondary); margin-bottom: 8px; line-height: 1.4;">
+        <div>&bull; Actual Sensor: <strong>${actualVal}</strong></div>
+        <div>&bull; Raw Satellite (CAMS): <strong>${camsVal}</strong></div>
+        <div>&bull; Coast Distance: <strong>${stn.dist_to_coast_km} km</strong> | Elev: <strong>${stn.elevation_mean_20km} m</strong></div>
       </div>
       <button class="popup-inspect-btn" onclick="selectStationAndScroll(${stn.station_id})">
-        View 90-Day Timeline &rarr;
+        Inspect 90-Day Trajectory in Chart Below &rarr;
       </button>
     `;
 
-    core.bindPopup(popupHtml, { maxWidth: 320 });
-    halo.bindPopup(popupHtml, { maxWidth: 320 });
-    mapCores.push(core);
+    core.bindPopup(popupHtml, { maxWidth: 300 });
+    halo.bindPopup(popupHtml, { maxWidth: 300 });
+
+    stationMarkersGroup.addLayer(halo);
+    stationMarkersGroup.addLayer(core);
   });
+}
 
-  if (mapCores.length > 0) {
-    leafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+// -----------------------------------------------------------------------------
+// TIMELINE SCRUBBER & DATE CONTROLLER
+// -----------------------------------------------------------------------------
+function seekTimelineDate(dayIndex) {
+  if (!timelineData || timelineData.length === 0) return;
+  currentDayIndex = Math.max(0, Math.min(timelineData.length - 1, dayIndex));
+
+  const dayRec = timelineData[currentDayIndex];
+  if (!dayRec) return;
+
+  // Update Slider & Date Display
+  document.getElementById('timelineSlider').value = currentDayIndex;
+  document.getElementById('currentDateDisplay').innerText = formatDateDisplay(dayRec.date);
+  document.getElementById('dayIndexBadge').innerText = `Day ${currentDayIndex + 1} of 92 ${currentDayIndex === 91 ? "(Today's Live Prediction)" : ''}`;
+
+  // Update Live KPIs
+  document.getElementById('kpi-nat-avg').innerText = `${dayRec.national_mean} ppb`;
+  document.getElementById('kpi-hotspot').innerText = `${dayRec.hotspot_state} (${dayRec.hotspot_val} ppb)`;
+  document.getElementById('kpi-cleanest').innerText = `${dayRec.cleanest_state} (${dayRec.cleanest_val} ppb)`;
+
+  // Update preset chip styling
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  if (currentDayIndex === 91) {
+    const latestChip = document.getElementById('chip-latest');
+    if (latestChip) latestChip.classList.add('active');
   }
+
+  // Fast recoloring of state polygons & station markers
+  if (indiaStatesLayer) {
+    indiaStatesLayer.eachLayer(layer => {
+      const sName = layer.feature.properties.NAME_1;
+      layer.setStyle(getIndiaStateStyle(sName));
+    });
+  }
+
+  initStationMarkers();
+  updateStateInspector(hoveredStateName);
 }
 
-// Color Gradients
-function getTrendGradientColor(delta) {
-  // Decreasing = Emerald/Cyan; Steady = Gray; Increasing = Coral/Red
-  if (delta <= -8) return '#059669';
-  if (delta <= -4) return '#10b981';
-  if (delta <= -1.5) return '#34d399';
-  if (delta < 1.5) return '#94a3b8';
-  if (delta < 4) return '#f59e0b';
-  if (delta < 6) return '#f97316';
-  return '#ef4444';
-}
-
-function getLevelGradientColor(ppb) {
-  if (ppb <= 10) return '#10b981';
-  if (ppb <= 16) return '#34d399';
-  if (ppb <= 22) return '#f59e0b';
-  if (ppb <= 28) return '#f97316';
-  return '#ef4444';
-}
-
-function getCorrectionGradientColor(corr) {
-  // If AI removed overprediction: Cool Blue; If AI increased underprediction: Orange
-  if (corr < -10) return '#1d4ed8';
-  if (corr < -2) return '#3b82f6';
-  if (corr < 2) return '#94a3b8';
-  if (corr < 8) return '#f59e0b';
-  return '#ef4444';
-}
-
-function getPlainExplanation(stn) {
-  const delta = stn.trend_7d ? stn.trend_7d.delta : 0;
-  if (stn.region === 'north') {
-    return delta < 0 
-      ? "Recent monsoon showers and shifting seasonal winds have cleansed Delhi-NCR's air basin."
-      : "Stagnant inland air and post-rain sunlight are triggering moderate photochemical ozone synthesis.";
+function toggleTimelinePlay() {
+  if (isPlaying) {
+    pauseTimeline();
   } else {
-    return stn.dist_to_coast_km < 100
-      ? "Marine sea breezes and coastal humidity keep ground ozone relatively dispersed."
-      : "Peninsular plateau conditions: AI corrected CAMS overprediction to reflect real local ground monitors.";
+    playTimeline();
   }
 }
 
+function playTimeline() {
+  isPlaying = true;
+  document.getElementById('play-icon').innerText = '⏸';
+  document.getElementById('play-label').innerText = 'Pause';
+
+  if (currentDayIndex >= timelineData.length - 1) {
+    currentDayIndex = 0;
+  }
+
+  playTimer = setInterval(() => {
+    if (currentDayIndex < timelineData.length - 1) {
+      seekTimelineDate(currentDayIndex + 1);
+    } else {
+      pauseTimeline();
+    }
+  }, 200);
+}
+
+function pauseTimeline() {
+  isPlaying = false;
+  if (playTimer) clearInterval(playTimer);
+  document.getElementById('play-icon').innerText = '▶';
+  document.getElementById('play-label').innerText = 'Play 92-Day Season';
+}
+
+function stepTimeline(delta) {
+  pauseTimeline();
+  seekTimelineDate(currentDayIndex + delta);
+}
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const formatted = `${days[dt.getUTCDay()]}, ${d < 10 ? '0' + d : d} ${months[m - 1]} ${y}`;
+  return dateStr === '2026-09-06' ? `${formatted} (Today • Live Forecast)` : formatted;
+}
+
+function updateStateInspector(stateName) {
+  const badge = document.getElementById('state-inspector-badge');
+  if (!badge) return;
+
+  const targetState = stateName || (timelineData[currentDayIndex] ? timelineData[currentDayIndex].hotspot_state : 'Delhi');
+  const dayRec = timelineData[currentDayIndex];
+  if (!dayRec || !dayRec.states || !dayRec.states[targetState]) {
+    badge.innerHTML = `<span style="color: var(--text-muted);">Hover/click any state or station for details</span>`;
+    return;
+  }
+
+  const sData = dayRec.states[targetState];
+  const terrainNote = REGIONAL_TERRAIN_EXPLANATIONS[targetState] || "Regional topography and air mass advection govern local photochemical dispersion.";
+
+  badge.innerHTML = `
+    <div>
+      <strong style="color: var(--text-main); font-family: var(--font-display);">${targetState}:</strong>
+      <span style="font-family: var(--font-mono); font-weight:700; color:${sData.color};">${sData.pred} ppb</span>
+      <span style="font-size: 11px; color: var(--text-secondary);">(${sData.cat} &bull; ${sData.trend_7d <= 0 ? sData.trend_7d + ' ppb &darr;' : '+' + sData.trend_7d + ' ppb &uarr;'})</span>
+      <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">${terrainNote}</div>
+    </div>
+  `;
+}
+
+// -----------------------------------------------------------------------------
+// GRADIENT MODES & TOGGLES
+// -----------------------------------------------------------------------------
 function setMapMode(mode, btn) {
   currentMapMode = mode;
   document.querySelectorAll('#map-mode-pills button').forEach(b => b.classList.remove('active', 'primary'));
@@ -1065,43 +1625,82 @@ function setMapMode(mode, btn) {
   const lRight = document.getElementById('grad-lbl-right');
 
   if (mode === 'trend') {
-    titleElem.innerText = '7-Day Ozone Trend (Increase vs. Decrease Gradient)';
+    titleElem.innerText = '7-Day Ozone Trend Gradient (Increase vs. Decrease)';
     subElem.innerText = 'Green indicates improving air; Red indicates rising photochemical smog';
     barElem.className = 'gradient-bar trend-mode';
-    lLeft.innerHTML = '&darr; -14 ppb (Decreasing)';
+    lLeft.innerHTML = '&darr; -14 ppb (Improving)';
     lMid.innerHTML = '&minus; 0 ppb (Steady)';
     lRight.innerHTML = '&uarr; +8 ppb (Increasing)';
-  } else if (mode === 'level') {
-    titleElem.innerText = 'Current Ozone Concentration Gradient';
-    subElem.innerText = 'Continuous spectrum from clean baseline to elevated smog episodes';
+  } else {
+    titleElem.innerText = 'Ozone Concentration Gradient (Absolute Level)';
+    subElem.innerText = 'Continuous spectrum from clean baseline to severe smog episodes';
     barElem.className = 'gradient-bar level-mode';
     lLeft.innerHTML = '0 ppb (Clean)';
-    lMid.innerHTML = '15 ppb (Moderate)';
-    lRight.innerHTML = '30+ ppb (Elevated)';
-  } else {
-    titleElem.innerText = 'AI vs. Satellite Adjustment Gradient';
-    subElem.innerText = 'Blue shows AI reduced satellite overprediction; Orange shows AI boosted underpredictions';
-    barElem.style.background = 'linear-gradient(to right, #1d4ed8 0%, #3b82f6 30%, #94a3b8 50%, #f59e0b 70%, #ef4444 100%)';
-    lLeft.innerHTML = '&minus;15 ppb (Cooled Down)';
-    lMid.innerHTML = '0 ppb (No Bias)';
-    lRight.innerHTML = '+12 ppb (Boosted)';
+    lMid.innerHTML = '16 ppb (Moderate)';
+    lRight.innerHTML = '28+ ppb (Hotspot)';
   }
 
-  renderGradientMap();
+  // Recolour state polygons & stations
+  if (indiaStatesLayer) {
+    indiaStatesLayer.eachLayer(layer => {
+      const sName = layer.feature.properties.NAME_1;
+      layer.setStyle(getIndiaStateStyle(sName));
+    });
+  }
+  initStationMarkers();
 }
 
-function filterMapRegion(region, btn) {
-  currentRegion = region;
-  document.querySelectorAll('#region-filter-pills button').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderGradientMap();
+function getTrendGradientColor(delta) {
+  if (delta <= -8) return '#059669'; // Deep Green
+  if (delta <= -4) return '#10b981'; // Green
+  if (delta <= -1.5) return '#34d399'; // Light Green
+  if (delta < 1.5) return '#94a3b8'; // Neutral Slate
+  if (delta < 4) return '#f59e0b'; // Amber
+  if (delta < 6) return '#f97316'; // Orange
+  return '#ef4444'; // Hot Red
+}
+
+function getLevelGradientColor(ppb) {
+  if (ppb <= 10) return '#10b981'; // Good
+  if (ppb <= 16) return '#84cc16'; // Satisfactory
+  if (ppb <= 22) return '#eab308'; // Moderate
+  if (ppb <= 28) return '#f97316'; // Poor
+  return '#ef4444'; // Hotspot / Very Poor
+}
+
+function toggleStationMarkers(visible) {
+  if (!leafletMap || !stationMarkersGroup) return;
+  if (visible) {
+    stationMarkersGroup.addTo(leafletMap);
+  } else {
+    leafletMap.removeLayer(stationMarkersGroup);
+  }
+}
+
+function toggleNeighborOutlines(visible) {
+  if (!leafletMap || !neighborLayer) return;
+  if (visible) {
+    neighborLayer.addTo(leafletMap);
+  } else {
+    leafletMap.removeLayer(neighborLayer);
+  }
+}
+
+function resetMapView() {
+  if (leafletMap) {
+    leafletMap.setView([22.5, 82.0], 5);
+  }
 }
 
 function selectStationAndScroll(sid) {
-  document.getElementById('stationSelect').value = sid;
-  onStationSelect(sid);
-  document.getElementById('timeseries-section').scrollIntoView({ behavior: 'smooth' });
+  const select = document.getElementById('stationSelect');
+  if (select) {
+    select.value = sid;
+    onStationSelect(sid);
+    document.getElementById('timeseries-section').scrollIntoView({ behavior: 'smooth' });
+  }
 }
+
 
 // -----------------------------------------------------------------------------
 // 2. TIME SERIES SECTION
