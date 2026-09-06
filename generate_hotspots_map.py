@@ -106,7 +106,7 @@ def main():
         {"lat": 25.3, "lon": 83.0, "val": 22.5},  # Varanasi
         {"lat": 24.5, "lon": 86.5, "val": 20.2},  # Jharkhand Plain
         {"lat": 22.6, "lon": 88.4, "val": 17.5},  # Kolkata / Bengal Delta
-
+        #this is a really good hackathon project
         # Northern Alpine / Himalayan Background (Kashmir, Ladakh, Himachal, Uttarakhand)
         {"lat": 34.1, "lon": 74.8, "val": 8.4},   # Srinagar
         {"lat": 34.2, "lon": 77.6, "val": 7.9},   # Leh / Ladakh
